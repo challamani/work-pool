@@ -267,6 +267,7 @@ public class TaskService {
         if (!recipientIsPublisher && !recipientIsFinisher) {
             throw new WorkPoolException("INVALID_RECIPIENT", "Recipient must be task publisher or assigned finisher");
         }
+        String effectiveSenderName = senderName == null || senderName.isBlank() ? "Work Pool user" : senderName;
 
         kafkaTemplate.send(KafkaTopics.NOTIFICATION_SEND, NotificationEvent.builder()
                 .recipientUserId(request.recipientUserId())
@@ -276,7 +277,7 @@ public class TaskService {
                 .metadata(Map.of(
                         "taskId", taskId,
                         "senderId", senderId,
-                        "senderName", senderName == null || senderName.isBlank() ? "Work Pool user" : senderName))
+                        "senderName", effectiveSenderName))
                 .createdAt(Instant.now())
                 .build());
     }
