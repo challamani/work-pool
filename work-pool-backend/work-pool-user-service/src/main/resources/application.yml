@@ -1,0 +1,63 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: work-pool-user-service
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/workpool_users}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:placeholder}
+            client-secret: ${GOOGLE_CLIENT_SECRET:placeholder}
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/api/v1/auth/oauth2/callback/google"
+          facebook:
+            client-id: ${FACEBOOK_CLIENT_ID:placeholder}
+            client-secret: ${FACEBOOK_CLIENT_SECRET:placeholder}
+            scope: email,public_profile
+            redirect-uri: "{baseUrl}/api/v1/auth/oauth2/callback/facebook"
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+jwt:
+  secret: ${JWT_SECRET:changeme_in_production_at_least_32_chars_long}
+  expiration-ms: 86400000  # 24 hours
+
+hazelcast:
+  cluster-name: ${HAZELCAST_CLUSTER_NAME:work-pool-cluster}
+  cluster-members: ${HAZELCAST_CLUSTER_MEMBERS:127.0.0.1:5701}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    com.workpool: DEBUG
+    org.springframework.security: INFO

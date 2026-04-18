@@ -1,0 +1,48 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / React
+work-pool-ui/node_modules/
+work-pool-ui/dist/
+work-pool-ui/.env.local
+work-pool-ui/.env.*.local
+work-pool-ui/npm-debug.log*
+work-pool-ui/yarn-debug.log*
+work-pool-ui/yarn-error.log*
+
+# Spring Boot
+*.log
+application-local.yml
+application-local.properties
+
+# Docker
+.docker/
+
+# Environment
+.env
+.env.*
+!.env.example

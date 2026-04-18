@@ -1,0 +1,211 @@
+version: '3.9'
+
+services:
+
+  # ─── Infrastructure ─────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: wp-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: workpool
+      MONGO_INITDB_ROOT_PASSWORD: workpool_secret
+      MONGO_INITDB_DATABASE: workpool
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - work-pool-net
+
+  hazelcast:
+    image: hazelcast/hazelcast:5.3
+    container_name: wp-hazelcast
+    restart: unless-stopped
+    ports:
+      - "5701:5701"
+    environment:
+      HZ_CLUSTERNAME: work-pool-cluster
+    networks:
+      - work-pool-net
+
+  hazelcast-management:
+    image: hazelcast/management-center:5.3
+    container_name: wp-hazelcast-mc
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+    environment:
+      MC_DEFAULT_CLUSTER: work-pool-cluster
+      MC_DEFAULT_CLUSTER_MEMBERS: hazelcast:5701
+    networks:
+      - work-pool-net
+    depends_on:
+      - hazelcast
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: wp-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - work-pool-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: wp-kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    depends_on:
+      - zookeeper
+    networks:
+      - work-pool-net
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: wp-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - work-pool-net
+
+  # ─── Backend Services ────────────────────────────────────────────────
+  user-service:
+    build: ./work-pool-backend/work-pool-user-service
+    container_name: wp-user-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_users?authSource=admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      HAZELCAST_CLUSTER_MEMBERS: hazelcast:5701
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+    depends_on:
+      - mongodb
+      - kafka
+      - hazelcast
+    networks:
+      - work-pool-net
+
+  task-service:
+    build: ./work-pool-backend/work-pool-task-service
+    container_name: wp-task-service
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_tasks?authSource=admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      HAZELCAST_CLUSTER_MEMBERS: hazelcast:5701
+      USER_SERVICE_URL: http://user-service:8081
+    depends_on:
+      - mongodb
+      - kafka
+      - hazelcast
+    networks:
+      - work-pool-net
+
+  notification-service:
+    build: ./work-pool-backend/work-pool-notification-service
+    container_name: wp-notification-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_notifications?authSource=admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+    depends_on:
+      - mongodb
+      - kafka
+    networks:
+      - work-pool-net
+
+  payment-service:
+    build: ./work-pool-backend/work-pool-payment-service
+    container_name: wp-payment-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_payments?authSource=admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_placeholder}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-placeholder_secret}
+    depends_on:
+      - mongodb
+      - kafka
+    networks:
+      - work-pool-net
+
+  rating-service:
+    build: ./work-pool-backend/work-pool-rating-service
+    container_name: wp-rating-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_ratings?authSource=admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      - mongodb
+      - kafka
+    networks:
+      - work-pool-net
+
+  api-gateway:
+    build: ./work-pool-backend/work-pool-api-gateway
+    container_name: wp-api-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      USER_SERVICE_URL: http://user-service:8081
+      TASK_SERVICE_URL: http://task-service:8082
+      NOTIFICATION_SERVICE_URL: http://notification-service:8083
+      PAYMENT_SERVICE_URL: http://payment-service:8084
+      RATING_SERVICE_URL: http://rating-service:8085
+      JWT_SECRET: ${JWT_SECRET:-changeme_in_production_256bit_secret}
+    depends_on:
+      - user-service
+      - task-service
+      - notification-service
+      - payment-service
+      - rating-service
+    networks:
+      - work-pool-net
+
+  # ─── Frontend ────────────────────────────────────────────────────────
+  ui:
+    build: ./work-pool-ui
+    container_name: wp-ui
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080
+      VITE_WS_URL: ws://localhost:8083
+    depends_on:
+      - api-gateway
+    networks:
+      - work-pool-net
+
+volumes:
+  mongo-data:
+
+networks:
+  work-pool-net:
+    driver: bridge

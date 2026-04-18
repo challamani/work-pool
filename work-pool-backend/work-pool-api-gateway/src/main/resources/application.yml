@@ -1,0 +1,59 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: work-pool-api-gateway
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+            allowedHeaders: "*"
+            allowCredentials: true
+      routes:
+        - id: user-service
+          uri: ${USER_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/auth/**, /api/v1/users/**
+
+        - id: task-service
+          uri: ${TASK_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/tasks/**
+
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/notifications/**, /ws/**
+
+        - id: payment-service
+          uri: ${PAYMENT_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/v1/payments/**
+
+        - id: rating-service
+          uri: ${RATING_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/ratings/**
+
+jwt:
+  secret: ${JWT_SECRET:changeme_in_production_at_least_32_chars_long}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    com.workpool: DEBUG
+    org.springframework.cloud.gateway: INFO
