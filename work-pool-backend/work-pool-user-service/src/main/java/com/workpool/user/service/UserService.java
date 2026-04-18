@@ -3,17 +3,22 @@ package com.workpool.user.service;
 import com.workpool.common.enums.UserRole;
 import com.workpool.common.exception.ResourceNotFoundException;
 import com.workpool.common.exception.WorkPoolException;
+import com.workpool.common.model.GeoLocation;
 import com.workpool.user.dto.*;
 import com.workpool.user.model.User;
 import com.workpool.user.repository.UserRepository;
 import com.workpool.user.security.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,6 +31,10 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final LoginAuditService loginAuditService;
+
+    private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final Duration ACCOUNT_LOCK_DURATION = Duration.ofMinutes(15);
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -43,12 +52,38 @@ public class UserService {
         return buildAuthResponse(user);
     }
 
-    public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User", request.getEmail()));
-        return buildAuthResponse(user);
+    public AuthResponse login(LoginRequest request, HttpServletRequest httpServletRequest) {
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+        String userId = user != null ? user.getId() : null;
+        try {
+            if (user != null && isLocked(user)) {
+                loginAuditService.record(userId, request.getEmail(), "PASSWORD", false,
+                        "ACCOUNT_LOCKED", httpServletRequest);
+                throw new WorkPoolException("ACCOUNT_LOCKED", "Account is temporarily locked due to failed login attempts");
+            }
+
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+            if (user == null) {
+                throw new ResourceNotFoundException("User", request.getEmail());
+            }
+
+            user.setFailedLoginAttempts(0);
+            user.setAccountLockedUntil(null);
+            userRepository.save(user);
+            loginAuditService.record(user.getId(), user.getEmail(), "PASSWORD", true, "SUCCESS", httpServletRequest);
+            return buildAuthResponse(user);
+        } catch (AuthenticationException ex) {
+            if (user != null) {
+                registerFailure(user);
+                loginAuditService.record(user.getId(), user.getEmail(), "PASSWORD", false,
+                        "INVALID_CREDENTIALS", httpServletRequest);
+            } else {
+                loginAuditService.record(null, request.getEmail(), "PASSWORD", false,
+                        "USER_NOT_FOUND", httpServletRequest);
+            }
+            throw new WorkPoolException("UNAUTHORIZED", "Invalid email or password");
+        }
     }
 
     public AuthResponse loginOrRegisterOAuth2(String provider, String providerId,
@@ -80,6 +115,16 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
         return toProfileResponse(user);
+    }
+
+    public UserProfileResponse getPublicProfile(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+        UserProfileResponse profile = toProfileResponse(user);
+        profile.setEmail(null);
+        profile.setPhoneNumber(null);
+        profile.setLocation(sanitizeLocation(user.getLocation()));
+        return profile;
     }
 
     public UserProfileResponse updateProfile(String userId, UpdateProfileRequest request) {
@@ -130,5 +175,26 @@ public class UserService {
                 .emailVerified(user.isEmailVerified())
                 .createdAt(user.getCreatedAt())
                 .build();
+    }
+
+    private boolean isLocked(User user) {
+        return user.getAccountLockedUntil() != null && user.getAccountLockedUntil().isAfter(Instant.now());
+    }
+
+    private void registerFailure(User user) {
+        int failedAttempts = user.getFailedLoginAttempts() + 1;
+        user.setFailedLoginAttempts(failedAttempts);
+        if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
+            user.setAccountLockedUntil(Instant.now().plus(ACCOUNT_LOCK_DURATION));
+            user.setFailedLoginAttempts(0);
+        }
+        userRepository.save(user);
+    }
+
+    private GeoLocation sanitizeLocation(GeoLocation location) {
+        if (location == null) {
+            return null;
+        }
+        return new GeoLocation(0, 0, location.getCity(), location.getDistrict(), location.getState(), null);
     }
 }

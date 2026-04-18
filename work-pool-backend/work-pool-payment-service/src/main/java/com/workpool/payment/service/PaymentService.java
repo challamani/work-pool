@@ -142,8 +142,9 @@ public class PaymentService {
         transaction = transactionRepository.save(transaction);
 
         // Credit finisher's wallet
-        Wallet finisherWallet = walletRepository.findByUserId(transaction.getFinisherId())
-                .orElseGet(() -> Wallet.builder().userId(transaction.getFinisherId()).build());
+        String finisherId = transaction.getFinisherId();
+        Wallet finisherWallet = walletRepository.findByUserId(finisherId)
+                .orElseGet(() -> Wallet.builder().userId(finisherId).build());
         finisherWallet.setBalance(finisherWallet.getBalance().add(transaction.getFinisherNetPayout()));
         walletRepository.save(finisherWallet);
 

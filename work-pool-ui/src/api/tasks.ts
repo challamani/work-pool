@@ -51,4 +51,7 @@ export const taskApi = {
 
   confirmCompletion: (taskId: string) =>
     api.post<ApiResponse<Task>>(`/api/v1/tasks/${taskId}/confirm`),
+
+  sendMessage: (taskId: string, recipientUserId: string, message: string) =>
+    api.post<ApiResponse<null>>(`/api/v1/tasks/${taskId}/messages`, { recipientUserId, message }),
 };

@@ -75,6 +75,11 @@ public class User {
     @Builder.Default
     private int totalRatings = 0;
 
+    @Builder.Default
+    private int failedLoginAttempts = 0;
+
+    private Instant accountLockedUntil;
+
     @CreatedDate
     private Instant createdAt;
 

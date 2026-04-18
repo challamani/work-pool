@@ -247,6 +247,41 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    public void sendTaskMessage(String taskId, String senderId, String senderName, SendTaskMessageRequest request) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task", taskId));
+
+        if (task.getAssignedFinisherId() == null) {
+            throw new WorkPoolException("TASK_NOT_ASSIGNED", "Messaging is enabled only after a finisher is assigned");
+        }
+        boolean senderIsPublisher = senderId.equals(task.getPublisherId());
+        boolean senderIsFinisher = senderId.equals(task.getAssignedFinisherId());
+        if (!senderIsPublisher && !senderIsFinisher) {
+            throw new UnauthorizedException("Only the task publisher or assigned finisher can send messages");
+        }
+        if (senderId.equals(request.recipientUserId())) {
+            throw new WorkPoolException("INVALID_RECIPIENT", "Sender and recipient cannot be the same");
+        }
+        boolean recipientIsPublisher = request.recipientUserId().equals(task.getPublisherId());
+        boolean recipientIsFinisher = request.recipientUserId().equals(task.getAssignedFinisherId());
+        if (!recipientIsPublisher && !recipientIsFinisher) {
+            throw new WorkPoolException("INVALID_RECIPIENT", "Recipient must be task publisher or assigned finisher");
+        }
+        String effectiveSenderName = senderName == null || senderName.isBlank() ? "Work Pool user" : senderName;
+
+        kafkaTemplate.send(KafkaTopics.NOTIFICATION_SEND, NotificationEvent.builder()
+                .recipientUserId(request.recipientUserId())
+                .type(NotificationType.DIRECT_MESSAGE)
+                .title("New message on task: " + task.getTitle())
+                .message(request.message())
+                .metadata(Map.of(
+                        "taskId", taskId,
+                        "senderId", senderId,
+                        "senderName", effectiveSenderName))
+                .createdAt(Instant.now())
+                .build());
+    }
+
     private void publishTaskPostedEvent(Task task) {
         TaskPostedEvent event = new TaskPostedEvent(
                 task.getId(), task.getPublisherId(), task.getTitle(), task.getCategory(),

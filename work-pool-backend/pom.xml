@@ -35,6 +35,9 @@
         <hazelcast.version>5.3.6</hazelcast.version>
         <springdoc.version>2.3.0</springdoc.version>
         <jjwt.version>0.12.5</jjwt.version>
+        <checkstyle.version>10.17.0</checkstyle.version>
+        <spotbugs.plugin.version>4.8.6.6</spotbugs.plugin.version>
+        <jacoco.version>0.8.12</jacoco.version>
     </properties>
 
     <dependencyManagement>
@@ -119,6 +122,16 @@
     </dependencyManagement>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -166,6 +179,54 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.1.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.4.0</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${checkstyle.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <configLocation>${maven.multiModuleProjectDirectory}/checkstyle.xml</configLocation>
+                        <consoleOutput>true</consoleOutput>
+                        <failsOnError>true</failsOnError>
+                        <violationSeverity>warning</violationSeverity>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>checkstyle-verify</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${spotbugs.plugin.version}</version>
+                    <configuration>
+                        <effort>Max</effort>
+                        <threshold>Medium</threshold>
+                        <xmlOutput>true</xmlOutput>
+                        <failOnError>true</failOnError>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>spotbugs-verify</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>spotbugs</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

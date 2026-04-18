@@ -1,143 +1,124 @@
 # Work Pool
 
-> **Connecting task publishers with skilled workers across India.**  
-> Work Pool is a task marketplace where anyone can post a task publicly and skilled workers in the region can bid, get hired, and earn money — with full escrow protection and 1% platform commission from both sides.
+Task marketplace monorepo (Spring Boot microservices + React UI).
 
----
+## Monorepo
 
-## 🗂️ Monorepo Structure
-
-```
+```text
 work-pool/
-├── work-pool-backend/            # Spring Boot multi-module backend (Maven)
-│   ├── pom.xml                   # Parent POM
-│   ├── work-pool-common/         # Shared models, DTOs, events, exceptions
-│   ├── work-pool-api-gateway/    # Spring Cloud Gateway (port 8080)
-│   ├── work-pool-user-service/   # Auth, profiles, skills (port 8081)
-│   ├── work-pool-task-service/   # Task marketplace, bids (port 8082)
-│   ├── work-pool-notification-service/  # WebSocket + Kafka (port 8083)
-│   ├── work-pool-payment-service/       # Razorpay escrow, wallet (port 8084)
-│   └── work-pool-rating-service/        # Ratings, trust profile (port 8085)
-└── work-pool-ui/                 # React + TypeScript + Vite + Tailwind CSS
+├── work-pool-backend/
+│   ├── work-pool-common
+│   ├── work-pool-api-gateway
+│   ├── work-pool-user-service
+│   ├── work-pool-task-service
+│   ├── work-pool-notification-service
+│   ├── work-pool-payment-service
+│   └── work-pool-rating-service
+└── work-pool-ui
 ```
 
----
+Each backend module now has its own README under its module directory.
 
-## 🚀 Quick Start (Docker Compose)
+## Local end-to-end run (Docker Compose)
 
 ```bash
-# 1. Copy and configure environment
-cp .env.example .env          # Set RAZORPAY_KEY_ID, JWT_SECRET, OAuth2 keys
-
-# 2. Start all infrastructure + services
-docker-compose up -d
-
-# 3. Access
-#   Frontend:  http://localhost:3000
-#   API:       http://localhost:8080
-#   Mailhog:   http://localhost:8025
-#   Hazelcast: http://localhost:8090
+cd /home/runner/work/work-pool/work-pool
+cp .env.example .env
+docker compose up -d
 ```
 
-### Or run services individually:
+Endpoints:
+- UI: `http://localhost:3000`
+- API gateway: `http://localhost:8080`
+- User service swagger: `http://localhost:8081/swagger-ui.html`
+- Task service swagger: `http://localhost:8082/swagger-ui.html`
+- Notification service swagger: `http://localhost:8083/swagger-ui.html`
+- Payment service swagger: `http://localhost:8084/swagger-ui.html`
+- Rating service swagger: `http://localhost:8085/swagger-ui.html`
+
+## Local run (without Docker for apps)
+
+Start infra first (Mongo/Kafka/Hazelcast/Mailhog):
 ```bash
-# Backend (from work-pool-backend/)
-mvn clean package -DskipTests
-cd work-pool-user-service && java -jar target/work-pool-user-service-*.jar
-
-# Frontend (from work-pool-ui/)
-npm install && npm run dev
+cd /home/runner/work/work-pool/work-pool
+docker compose up -d mongodb zookeeper kafka hazelcast hazelcast-management mailhog
 ```
 
----
-
-## 🏗️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS, React Query, Zustand |
-| **Backend** | Spring Boot 3.2, Spring Cloud Gateway, Spring Security |
-| **Auth** | JWT + OAuth2 (Google, Facebook) |
-| **Messaging** | Apache Kafka |
-| **Database** | MongoDB (per service) |
-| **Cache/Distributed** | Hazelcast 5 |
-| **Payments** | Razorpay (escrow + UPI/cards) |
-| **Notifications** | WebSocket (STOMP) + Kafka |
-| **API Docs** | SpringDoc OpenAPI / Swagger UI |
-
----
-
-## 📋 Core Features (MVP)
-
-### Task Marketplace
-- Post tasks with category, location (city/district/state), budget range, and schedule
-- 20+ task categories: Home Repair, Cleaning, Teaching, Cooking, Moving, IT Support...
-- Skill + location matching → notify nearby qualified workers
-- Full bid lifecycle: place → accept → reject → withdraw
-
-### Task Lifecycle
-```
-OPEN → BIDDING → ASSIGNED → IN_PROGRESS → PENDING_REVIEW → COMPLETED
-                                                          ↘ DISPUTED
+Run backend:
+```bash
+cd /home/runner/work/work-pool/work-pool/work-pool-backend
+mvn clean verify
+mvn -pl work-pool-user-service spring-boot:run
+mvn -pl work-pool-task-service spring-boot:run
+mvn -pl work-pool-notification-service spring-boot:run
+mvn -pl work-pool-payment-service spring-boot:run
+mvn -pl work-pool-rating-service spring-boot:run
+mvn -pl work-pool-api-gateway spring-boot:run
 ```
 
-### Payments (Escrow)
-- Publisher creates a Razorpay order; funds held in escrow
-- Platform takes **1% from publisher** + **1% from finisher** (total 2% of agreed amount)
-- Escrow releases to finisher only after publisher confirms completion
+Run UI:
+```bash
+cd /home/runner/work/work-pool/work-pool/work-pool-ui
+npm install
+npm run dev
+```
 
-### Identity & Trust
-- Google / Facebook OAuth2 login + email/password
-- Profile: name, mobile, skills, city/district/state, service radius
-- Aadhaar verification workflow (UNVERIFIED → PENDING → VERIFIED)
-- Post-completion star ratings (1–5) and written reviews
-- Aggregate trust score displayed on public profile
+## Security and fraud-hardening updates
 
-### Notifications
-- Real-time WebSocket (STOMP) notifications for matched tasks, bid updates, payment events
-- Persistent notification log with unread count badge
+- Login audit capture added in user service for each password login attempt:
+  - external/client IP
+  - forwarded IP chain
+  - user-agent
+  - language/origin/referer
+  - request correlation id
+  - optional geo headers from reverse proxies
+- Account lockout added for repeated failed login attempts.
+- Public user profile API now masks sensitive contact/location details.
 
----
+## Publisher-finisher messaging (pre-Phase 7 enablement)
 
-## 🔑 Environment Variables
+- New secure task messaging endpoint:
+  - `POST /api/v1/tasks/{taskId}/messages`
+- Only task publisher and assigned finisher can message each other.
+- Messages flow through Kafka notification topic and are delivered in real-time via WebSocket.
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `JWT_SECRET` | Shared JWT signing secret (≥32 chars) | `changeme_...` |
-| `GOOGLE_CLIENT_ID` | Google OAuth2 client ID | placeholder |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth2 client secret | placeholder |
-| `FACEBOOK_CLIENT_ID` | Facebook OAuth2 app ID | placeholder |
-| `FACEBOOK_CLIENT_SECRET` | Facebook OAuth2 secret | placeholder |
-| `RAZORPAY_KEY_ID` | Razorpay test/live key | `rzp_test_...` |
-| `RAZORPAY_KEY_SECRET` | Razorpay secret | placeholder |
+## Local OAuth login testing (“Continue with Google/Facebook”)
 
----
+1. Create OAuth apps in Google/Facebook developer consoles.
+2. Set callback URLs to user service callback routes:
+   - `http://localhost:8081/api/v1/auth/oauth2/callback/google`
+   - `http://localhost:8081/api/v1/auth/oauth2/callback/facebook`
+3. Put credentials into `.env`:
+   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+   - `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET`
+4. Start stack and use login/register page “Google” or “Facebook” buttons.
 
-## 📝 API Overview
+## Local test payments
 
-All requests go through the API Gateway at `http://localhost:8080`.
+1. Use Razorpay test credentials in `.env`:
+   - `RAZORPAY_KEY_ID=rzp_test_...`
+   - `RAZORPAY_KEY_SECRET=...`
+   - `RAZORPAY_WEBHOOK_SECRET=...`
+2. Create an order using payment API (`POST /api/v1/payments/orders`).
+3. Complete checkout in Razorpay test mode (test card/UPI).
+4. Validate webhook handling through `POST /api/v1/payments/webhook`.
 
-| Service | Base Path | Key Endpoints |
-|---------|-----------|---------------|
-| Auth | `/api/v1/auth` | `POST /register`, `POST /login`, OAuth2 flows |
-| Users | `/api/v1/users` | `GET /me`, `PUT /me`, `GET /{id}` |
-| Tasks | `/api/v1/tasks` | `GET /`, `POST /`, `GET /{id}`, bid APIs |
-| Notifications | `/api/v1/notifications` | `GET /`, `PATCH /{id}/read`, WebSocket `/ws` |
-| Payments | `/api/v1/payments` | `POST /orders`, `POST /webhook`, `GET /wallet` |
-| Ratings | `/api/v1/ratings` | `POST /`, `GET /users/{id}`, `GET /users/{id}/summary` |
+## Quality gates and coverage
 
-Swagger UI for each service: `http://localhost:{port}/swagger-ui.html`
+Backend:
+- `mvn clean verify` now runs:
+  - unit tests
+  - Checkstyle
+  - SpotBugs
+  - JaCoCo reporting/checks (work-pool-common coverage gate)
 
----
+Frontend:
+- `npm run lint`
+- `npm run build`
 
-## 🗓️ Phased Roadmap
+## CI
 
-- [x] Phase 1 – Monorepo baseline (Spring Boot multi-module + React)
-- [x] Phase 2 – Core identity and onboarding (JWT + OAuth2 + profile)
-- [x] Phase 3 – Task marketplace core (CRUD + bid/accept lifecycle)
-- [x] Phase 4 – Wallet/escrow and 1% commission (Razorpay)
-- [x] Phase 5 – Notifications (WebSocket + Kafka)
-- [x] Phase 6 – Ratings and trust profile
-- [ ] Phase 7 – Admin panel + fraud controls
-- [ ] Phase 8 – AI features: voice interaction, auto-categorization
-
+GitHub Actions workflow added at `.github/workflows/ci.yml`:
+- backend quality/build/test
+- frontend lint/build
+- docker compose smoke validation
