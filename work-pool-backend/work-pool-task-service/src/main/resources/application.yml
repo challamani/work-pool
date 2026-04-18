@@ -1,0 +1,38 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: work-pool-task-service
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/workpool_tasks}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+jwt:
+  secret: ${JWT_SECRET:changeme_in_production_at_least_32_chars_long}
+
+hazelcast:
+  cluster-name: ${HAZELCAST_CLUSTER_NAME:work-pool-cluster}
+  cluster-members: ${HAZELCAST_CLUSTER_MEMBERS:127.0.0.1:5701}
+
+user-service:
+  url: ${USER_SERVICE_URL:http://localhost:8081}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    com.workpool: DEBUG
