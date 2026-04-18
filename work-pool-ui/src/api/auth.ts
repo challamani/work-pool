@@ -29,8 +29,10 @@ export const authApi = {
 };
 
 export const userApi = {
-  getMe: () =>
-    api.get<ApiResponse<UserProfile>>('/api/v1/users/me'),
+  getMe: (token?: string) =>
+    api.get<ApiResponse<UserProfile>>('/api/v1/users/me', token
+      ? { headers: { Authorization: `Bearer ${token}` } }
+      : undefined),
 
   getProfile: (userId: string) =>
     api.get<ApiResponse<UserProfile>>(`/api/v1/users/${userId}`),

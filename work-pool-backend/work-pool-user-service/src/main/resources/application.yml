@@ -61,3 +61,8 @@ logging:
   level:
     com.workpool: DEBUG
     org.springframework.security: INFO
+
+app:
+  oauth2:
+    success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:http://localhost:3000/auth/oauth2/callback}
+    failure-redirect-url: ${OAUTH2_FAILURE_REDIRECT_URL:http://localhost:3000/login}

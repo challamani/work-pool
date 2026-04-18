@@ -8,6 +8,7 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 const HomePage = React.lazy(() => import('./pages/HomePage'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
 const RegisterPage = React.lazy(() => import('./pages/RegisterPage'));
+const OAuth2CallbackPage = React.lazy(() => import('./pages/OAuth2CallbackPage'));
 const TasksPage = React.lazy(() => import('./pages/TasksPage'));
 const TaskDetailPage = React.lazy(() => import('./pages/TaskDetailPage'));
 const PostTaskPage = React.lazy(() => import('./pages/PostTaskPage'));
@@ -28,6 +29,7 @@ const App: React.FC = () => (
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth/oauth2/callback" element={<OAuth2CallbackPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/tasks/:id" element={<TaskDetailPage />} />
             <Route element={<ProtectedRoute />}>
