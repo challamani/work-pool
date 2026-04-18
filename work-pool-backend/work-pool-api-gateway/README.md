@@ -11,6 +11,19 @@ cd /home/runner/work/work-pool/work-pool/work-pool-backend
 mvn -pl work-pool-api-gateway spring-boot:run
 ```
 
+## Maven quality commands
+```bash
+# Run tests
+cd /home/runner/work/work-pool/work-pool/work-pool-backend
+mvn -pl work-pool-api-gateway test
+
+# Run coverage (JaCoCo report + checks)
+mvn -pl work-pool-api-gateway verify
+
+# Run checkstyle
+mvn -pl work-pool-api-gateway checkstyle:check
+```
+
 ## Local run with HTTPS (self-signed certificate)
 
 ### Step 1 — Generate a self-signed PKCS12 keystore

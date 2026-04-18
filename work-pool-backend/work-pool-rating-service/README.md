@@ -3,10 +3,20 @@
 ## Purpose
 Handles post-completion ratings/reviews and user trust score updates.
 
-## Local run
+## Maven commands
 ```bash
+# Run locally
 cd /home/runner/work/work-pool/work-pool/work-pool-backend
 mvn -pl work-pool-rating-service spring-boot:run
+
+# Run tests
+mvn -pl work-pool-rating-service test
+
+# Run coverage (JaCoCo report + checks)
+mvn -pl work-pool-rating-service verify
+
+# Run checkstyle
+mvn -pl work-pool-rating-service checkstyle:check
 ```
 
 ## Default port
