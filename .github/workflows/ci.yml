@@ -5,6 +5,9 @@ on:
     branches: [main, master, develop, "copilot/**"]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   backend-quality:
     name: Backend - build/test/quality
