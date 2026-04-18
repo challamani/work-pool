@@ -9,7 +9,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8083';
 
 export function useWebSocket(onNotification?: (n: Notification) => void) {
   const { token, user } = useAuthStore();
-  const { unreadCount, setUnreadCount } = useNotificationStore();
+  const { incrementUnread } = useNotificationStore();
   const clientRef = useRef<Client | null>(null);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function useWebSocket(onNotification?: (n: Notification) => void) {
       onConnect: () => {
         client.subscribe(`/user/${user.id}/queue/notifications`, (message) => {
           const notification: Notification = JSON.parse(message.body);
-          setUnreadCount(unreadCount + 1);
+          incrementUnread();
           onNotification?.(notification);
         });
       },
@@ -34,7 +34,7 @@ export function useWebSocket(onNotification?: (n: Notification) => void) {
     return () => {
       client.deactivate();
     };
-  }, [token, user?.id]);
+  }, [incrementUnread, onNotification, token, user]);
 
   return clientRef;
 }

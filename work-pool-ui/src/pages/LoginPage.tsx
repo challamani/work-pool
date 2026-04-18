@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { Briefcase } from 'lucide-react';
+import type { ApiResponse } from '../types';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,8 +23,9 @@ const LoginPage: React.FC = () => {
       const data = res.data.data!;
       login(data.accessToken, data.user);
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+    } catch (err) {
+      const apiError = err as AxiosError<ApiResponse<null>>;
+      setError(apiError.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }

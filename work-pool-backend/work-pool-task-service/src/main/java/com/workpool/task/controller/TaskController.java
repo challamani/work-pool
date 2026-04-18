@@ -115,4 +115,16 @@ public class TaskController {
             @AuthenticationPrincipal String userId) {
         return ResponseEntity.ok(ApiResponse.ok(taskService.confirmCompletion(taskId, userId)));
     }
+
+    @Operation(summary = "Send a message between publisher and assigned finisher",
+            security = @SecurityRequirement(name = "bearerAuth"))
+    @PostMapping("/{taskId}/messages")
+    public ResponseEntity<ApiResponse<Void>> sendTaskMessage(
+            @PathVariable String taskId,
+            @AuthenticationPrincipal String userId,
+            @RequestHeader(value = "X-User-Name", defaultValue = "Work Pool user") String userName,
+            @Valid @RequestBody SendTaskMessageRequest request) {
+        taskService.sendTaskMessage(taskId, userId, userName, request);
+        return ResponseEntity.ok(ApiResponse.ok(null, "Message sent"));
+    }
 }

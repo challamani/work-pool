@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { taskApi } from '../api/tasks';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import type { ApiResponse } from '../types';
 
 const CATEGORIES = [
   'HOME_REPAIR', 'CLEANING', 'PLUMBING', 'ELECTRICAL', 'PAINTING', 'CARPENTRY',
@@ -46,7 +48,10 @@ const PostTaskPage: React.FC = () => {
     onSuccess: (res) => {
       navigate(`/tasks/${res.data.data?.id}`);
     },
-    onError: (err: any) => setError(err.response?.data?.message || 'Failed to post task'),
+    onError: (err) => {
+      const apiError = err as AxiosError<ApiResponse<null>>;
+      setError(apiError.response?.data?.message || 'Failed to post task');
+    },
   });
 
   const addSkill = (skill: string) => {

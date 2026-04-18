@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { taskApi } from '../api/tasks';
 import { useAuthStore } from '../store/authStore';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { MapPin, IndianRupee, Clock, Star, CheckCircle } from 'lucide-react';
-import type { Bid } from '../types';
+import type { ApiResponse, Bid } from '../types';
 
 const TaskDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +14,8 @@ const TaskDetailPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [bidForm, setBidForm] = useState({ proposedAmount: '', coverNote: '', estimatedDurationHours: 4 });
   const [showBidForm, setShowBidForm] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  const [messageStatus, setMessageStatus] = useState('');
   const [error, setError] = useState('');
 
   const { data: taskData, isLoading } = useQuery({
@@ -42,7 +45,10 @@ const TaskDetailPage: React.FC = () => {
       setShowBidForm(false);
       setError('');
     },
-    onError: (err: any) => setError(err.response?.data?.message || 'Failed to place bid'),
+    onError: (err) => {
+      const apiError = err as AxiosError<ApiResponse<null>>;
+      setError(apiError.response?.data?.message || 'Failed to place bid');
+    },
   });
 
   const acceptBidMutation = useMutation({
@@ -55,11 +61,35 @@ const TaskDetailPage: React.FC = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['task', id] }),
   });
 
+  const messageMutation = useMutation({
+    mutationFn: (message: string) => {
+      if (!task || !user?.id) {
+        return Promise.reject(new Error('Task or user is missing'));
+      }
+      const recipientUserId =
+        user.id === task.publisherId ? task.assignedFinisherId : task.publisherId;
+      if (!recipientUserId) {
+        return Promise.reject(new Error('Recipient unavailable'));
+      }
+      return taskApi.sendMessage(task.id, recipientUserId, message);
+    },
+    onSuccess: () => {
+      setMessageText('');
+      setMessageStatus('Message sent');
+    },
+    onError: (err) => {
+      const apiError = err as AxiosError<ApiResponse<null>>;
+      setMessageStatus(apiError.response?.data?.message || 'Failed to send message');
+    },
+  });
+
   if (isLoading) return <LoadingSpinner className="py-20" />;
   if (!task) return <div className="text-center py-20 text-gray-500">Task not found</div>;
 
   const isPublisher = user?.id === task.publisherId;
+  const isAssignedFinisher = user?.id === task.assignedFinisherId;
   const canBid = isAuthenticated && !isPublisher && (task.status === 'OPEN' || task.status === 'BIDDING');
+  const canMessage = isAuthenticated && (isPublisher || isAssignedFinisher) && !!task.assignedFinisherId;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
@@ -136,6 +166,39 @@ const TaskDetailPage: React.FC = () => {
               </div>
             </form>
           )}
+        </div>
+      )}
+
+      {canMessage && (
+        <div className="card p-6 space-y-3">
+          <h2 className="font-semibold text-gray-900">Message participant</h2>
+          <p className="text-xs text-gray-500">
+            Messaging is available only between the task publisher and assigned finisher.
+          </p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setMessageStatus('');
+              messageMutation.mutate(messageText.trim());
+            }}
+            className="space-y-3"
+          >
+            <textarea
+              className="input"
+              rows={3}
+              placeholder="Write your message"
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              required
+              minLength={2}
+            />
+            <div className="flex items-center gap-3">
+              <button type="submit" disabled={messageMutation.isPending} className="btn-secondary">
+                {messageMutation.isPending ? <LoadingSpinner size="sm" className="inline" /> : 'Send Message'}
+              </button>
+              {messageStatus && <span className="text-sm text-gray-600">{messageStatus}</span>}
+            </div>
+          </form>
         </div>
       )}
 

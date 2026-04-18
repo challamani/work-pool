@@ -38,6 +38,6 @@ public class UserController {
     @Operation(summary = "Get public profile of a user")
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getPublicProfile(@PathVariable String userId) {
-        return ResponseEntity.ok(ApiResponse.ok(userService.getProfile(userId)));
+        return ResponseEntity.ok(ApiResponse.ok(userService.getPublicProfile(userId)));
     }
 }

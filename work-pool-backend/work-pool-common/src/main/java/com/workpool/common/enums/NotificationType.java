@@ -11,5 +11,6 @@ public enum NotificationType {
     PAYMENT_HELD,
     PAYMENT_RELEASED,
     RATING_RECEIVED,
+    DIRECT_MESSAGE,
     SYSTEM_ALERT
 }
