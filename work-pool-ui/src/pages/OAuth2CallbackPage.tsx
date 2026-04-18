@@ -11,9 +11,15 @@ const OAuth2CallbackPage: React.FC = () => {
   const hasStarted = useRef(false);
   const token = searchParams.get('token');
   const oauthError = searchParams.get('error');
-  const initialError = oauthError
-    ? 'Social login failed. Please try again.'
-    : (!token ? 'Missing OAuth token. Please try again.' : '');
+  const initialError = (() => {
+    if (oauthError) {
+      return 'Social login failed. Please try again.';
+    }
+    if (!token) {
+      return 'Missing OAuth token. Please try again.';
+    }
+    return '';
+  })();
   const [error, setError] = useState(initialError);
 
   useEffect(() => {
@@ -26,22 +32,21 @@ const OAuth2CallbackPage: React.FC = () => {
       return;
     }
 
-    localStorage.setItem('wp_token', token);
-
-    void userApi.getMe()
-      .then((response) => {
+    const completeLogin = async () => {
+      try {
+        const response = await userApi.getMe(token);
         const profile = response.data.data;
         if (!profile) {
           throw new Error('Missing profile');
         }
         login(token, profile);
         navigate('/', { replace: true });
-      })
-      .catch(() => {
-        localStorage.removeItem('wp_token');
-        localStorage.removeItem('wp_user');
+      } catch {
         setError('Unable to complete login. Please try again.');
-      });
+      }
+    };
+
+    completeLogin();
   }, [initialError, login, navigate, token]);
 
   if (error) {

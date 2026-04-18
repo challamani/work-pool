@@ -16,6 +16,8 @@ import java.io.IOException;
 @Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
+    private static final boolean ENCODE_REDIRECT_VALUES = true;
+
     @Value("${app.oauth2.failure-redirect-url:http://localhost:3000/login}")
     private String failureRedirectUrl;
 
@@ -25,7 +27,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                                         AuthenticationException exception) throws IOException, ServletException {
         String redirectUrl = UriComponentsBuilder.fromUriString(failureRedirectUrl)
                 .queryParam("error", "oauth_login_failed")
-                .build(true)
+                .build(ENCODE_REDIRECT_VALUES)
                 .toUriString();
         response.sendRedirect(redirectUrl);
     }

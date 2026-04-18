@@ -39,6 +39,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // CSRF disabled: stateless JWT Bearer-token API, not cookie-based — CSRF attacks cannot apply.
             .csrf(AbstractHttpConfigurer::disable)
+            // OAuth2 authorization-code flow needs temporary session state for provider round-trip.
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()

@@ -24,6 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private static final boolean ENCODE_REDIRECT_VALUES = true;
+
     private final UserService userService;
 
     @Value("${app.oauth2.success-redirect-url:http://localhost:3000/auth/oauth2/callback}")
@@ -59,7 +61,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String redirectUrl = UriComponentsBuilder.fromUriString(successRedirectUrl)
                 .queryParam("token", authResponse.getAccessToken())
-                .build(true)
+                .build(ENCODE_REDIRECT_VALUES)
                 .toUriString();
 
         clearAuthenticationAttributes(request);
@@ -80,19 +82,18 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         if ("google".equalsIgnoreCase(provider)) {
             return toStringOrNull(attributes.get("picture"));
         }
-        if (!"facebook".equalsIgnoreCase(provider)) {
-            return null;
+        if ("facebook".equalsIgnoreCase(provider)) {
+            Object picture = attributes.get("picture");
+            if (!(picture instanceof Map<?, ?> pictureMap)) {
+                return null;
+            }
+            Object data = pictureMap.get("data");
+            if (!(data instanceof Map<?, ?> dataMap)) {
+                return null;
+            }
+            return toStringOrNull(dataMap.get("url"));
         }
-
-        Object picture = attributes.get("picture");
-        if (!(picture instanceof Map<?, ?> pictureMap)) {
-            return null;
-        }
-        Object data = pictureMap.get("data");
-        if (!(data instanceof Map<?, ?> dataMap)) {
-            return null;
-        }
-        return toStringOrNull(dataMap.get("url"));
+        return null;
     }
 
     private String toStringOrNull(Object value) {
