@@ -6,7 +6,7 @@ Escrow and payout orchestration with commission handling and Razorpay integratio
 ## Maven commands
 ```bash
 # Run locally
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+cd work-pool-backend
 mvn -pl work-pool-payment-service spring-boot:run
 
 # Run tests

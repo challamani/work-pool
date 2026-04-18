@@ -8,7 +8,7 @@ route must carry a valid `Authorization: Bearer <token>` header.
 ## Maven commands
 ```bash
 # Run locally (HTTP)
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+cd work-pool-backend
 mvn -pl work-pool-api-gateway spring-boot:run
 
 # Run tests

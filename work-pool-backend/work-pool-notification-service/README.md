@@ -6,7 +6,7 @@ Persists and delivers real-time notifications using Kafka + WebSocket (STOMP/Soc
 ## Maven commands
 ```bash
 # Run locally
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+cd work-pool-backend
 mvn -pl work-pool-notification-service spring-boot:run
 
 # Run tests

@@ -6,7 +6,7 @@ Authentication, user registration/login, profile management, and login audit tra
 ## Maven commands
 ```bash
 # Run locally
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+cd work-pool-backend
 mvn -pl work-pool-user-service spring-boot:run
 
 # Run tests

@@ -6,7 +6,7 @@ Task lifecycle, bidding, assignment, completion flow, and publisher-finisher mes
 ## Maven commands
 ```bash
 # Run locally
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+cd work-pool-backend
 mvn -pl work-pool-task-service spring-boot:run
 
 # Run tests
