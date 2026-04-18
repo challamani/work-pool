@@ -69,7 +69,7 @@ jobs:
         run: docker compose build
 
       - name: Boot core infra
-        run: docker compose up -d mongodb zookeeper kafka hazelcast mailhog
+        run: docker compose up -d mongodb kafka hazelcast mailhog
 
       - name: Show running containers
         run: docker compose ps
