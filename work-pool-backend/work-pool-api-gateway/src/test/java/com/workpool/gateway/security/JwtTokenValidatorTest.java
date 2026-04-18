@@ -1,6 +1,7 @@
 package com.workpool.gateway.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +43,7 @@ class JwtTokenValidatorTest {
 
     @Test
     void validateAndParseClaims_invalidToken_throws() {
-        assertThrows(Exception.class, () -> validator.validateAndParseClaims("not.a.token"));
+        assertThrows(JwtException.class, () -> validator.validateAndParseClaims("not.a.token"));
     }
 
     @Test

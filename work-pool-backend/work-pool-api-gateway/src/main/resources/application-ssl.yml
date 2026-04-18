@@ -10,7 +10,7 @@ server:
     enabled: true
     # Path to keystore; override at runtime with SERVER_SSL_KEY_STORE env var
     key-store: ${SERVER_SSL_KEY_STORE:classpath:ssl/gateway-keystore.p12}
-    key-store-password: ${SERVER_SSL_KEY_STORE_PASSWORD:changeit}
+    key-store-password: ${SERVER_SSL_KEY_STORE_PASSWORD}
     key-store-type: PKCS12
     key-alias: ${SERVER_SSL_KEY_ALIAS:gateway}
     # Enforce TLS 1.2+ only; disable weak protocols

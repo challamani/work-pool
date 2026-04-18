@@ -140,12 +140,13 @@ class JwtGlobalFilterTest {
     }
 
     @Test
-    void filter_taskPathWithSubpath_isPublicDueToPrefix_passesThrough() {
-        // /api/v1/tasks/someId/bids starts with /api/v1/tasks which is in PUBLIC_PATHS
+    void filter_taskSubpath_notPublic_returns401() {
+        // /api/v1/tasks/someId/bids is NOT public — only exact /api/v1/tasks and /api/v1/tasks/{id} are
         MockServerHttpRequest request = MockServerHttpRequest
                 .get("/api/v1/tasks/someId/bids").build();
         MockServerWebExchange exchange = MockServerWebExchange.from(request);
         StepVerifier.create(filter.filter(exchange, chain)).verifyComplete();
+        assertEquals(401, exchange.getResponse().getStatusCode().value());
     }
 
     @Test
