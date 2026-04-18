@@ -14,6 +14,7 @@ const TaskDetailPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [bidForm, setBidForm] = useState({ proposedAmount: '', coverNote: '', estimatedDurationHours: 4 });
   const [showBidForm, setShowBidForm] = useState(false);
+  const [hasPlacedBid, setHasPlacedBid] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [messageStatus, setMessageStatus] = useState('');
   const [error, setError] = useState('');
@@ -42,6 +43,8 @@ const TaskDetailPage: React.FC = () => {
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task', id] });
+      setHasPlacedBid(true);
+      setBidForm({ proposedAmount: '', coverNote: '', estimatedDurationHours: 4 });
       setShowBidForm(false);
       setError('');
     },
@@ -53,7 +56,10 @@ const TaskDetailPage: React.FC = () => {
 
   const acceptBidMutation = useMutation({
     mutationFn: (bidId: string) => taskApi.acceptBid(id!, bidId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['task', id] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['task', id] });
+      queryClient.invalidateQueries({ queryKey: ['bids', id] });
+    },
   });
 
   const confirmMutation = useMutation({
@@ -86,9 +92,24 @@ const TaskDetailPage: React.FC = () => {
   if (isLoading) return <LoadingSpinner className="py-20" />;
   if (!task) return <div className="text-center py-20 text-gray-500">Task not found</div>;
 
+  const handleBidSubmit = () => {
+    const proposedAmount = Number(bidForm.proposedAmount);
+    const durationHours = Number(bidForm.estimatedDurationHours);
+    if (!Number.isFinite(proposedAmount) || proposedAmount < 1) {
+      setError('Please enter a valid bid amount');
+      return;
+    }
+    if (!Number.isFinite(durationHours) || durationHours < 1 || durationHours > 720) {
+      setError('Estimated duration must be between 1 and 720 hours');
+      return;
+    }
+    setError('');
+    bidMutation.mutate();
+  };
+
   const isPublisher = user?.id === task.publisherId;
   const isAssignedFinisher = user?.id === task.assignedFinisherId;
-  const canBid = isAuthenticated && !isPublisher && (task.status === 'OPEN' || task.status === 'BIDDING');
+  const canBid = isAuthenticated && !isPublisher && !hasPlacedBid && (task.status === 'OPEN' || task.status === 'BIDDING');
   const canMessage = isAuthenticated && (isPublisher || isAssignedFinisher) && !!task.assignedFinisherId;
 
   return (
@@ -141,7 +162,7 @@ const TaskDetailPage: React.FC = () => {
               Bid on this Task
             </button>
           ) : (
-            <form onSubmit={(e) => { e.preventDefault(); bidMutation.mutate(); }} className="space-y-3">
+            <form onSubmit={(e) => { e.preventDefault(); handleBidSubmit(); }} className="space-y-3">
               {error && <div className="text-red-600 text-sm">{error}</div>}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Your Price (₹)</label>
@@ -162,10 +183,15 @@ const TaskDetailPage: React.FC = () => {
                 <button type="submit" disabled={bidMutation.isPending} className="btn-primary">
                   {bidMutation.isPending ? <LoadingSpinner size="sm" className="inline" /> : 'Submit Bid'}
                 </button>
-                <button type="button" onClick={() => setShowBidForm(false)} className="btn-secondary">Cancel</button>
+                <button type="button" onClick={() => { setShowBidForm(false); setError(''); }} className="btn-secondary">Cancel</button>
               </div>
             </form>
           )}
+        </div>
+      )}
+      {hasPlacedBid && (
+        <div className="card p-4 text-sm text-emerald-700 bg-emerald-50 border-emerald-200">
+          Your bid has been submitted. You will be notified once the publisher reviews bids.
         </div>
       )}
 
