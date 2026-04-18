@@ -43,7 +43,7 @@ services:
 
   # KRaft-mode Kafka (Kafka 3.x+) — no ZooKeeper required
   kafka:
-    image: bitnami/kafka:latest
+    image: bitnamilegacy/kafka:latest
     container_name: wp-kafka
     restart: unless-stopped
     ports:
