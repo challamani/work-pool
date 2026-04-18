@@ -57,6 +57,8 @@ const renderTaskDetailPage = () => {
   );
 };
 
+const mockApiResponse = <T,>(data: T) => ({ data: { success: true, data } } as never);
+
 describe('TaskDetailPage bidding integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -87,15 +89,8 @@ describe('TaskDetailPage bidding integration', () => {
       isAuthenticated: true,
     });
 
-    vi.mocked(taskApi.getTask).mockResolvedValue({
-      data: { success: true, data: baseTask },
-    });
-    vi.mocked(taskApi.placeBid).mockResolvedValue({
-      data: {
-        success: true,
-        data: { id: 'bid-1' } as Bid,
-      },
-    });
+    vi.mocked(taskApi.getTask).mockResolvedValue(mockApiResponse(baseTask));
+    vi.mocked(taskApi.placeBid).mockResolvedValue(mockApiResponse({ id: 'bid-1' } as Bid));
 
     renderTaskDetailPage();
 
@@ -140,51 +135,31 @@ describe('TaskDetailPage bidding integration', () => {
       isAuthenticated: true,
     });
 
-    vi.mocked(taskApi.getTask).mockResolvedValue({
-      data: {
-        success: true,
-        data: { ...baseTask, status: 'BIDDING', bidCount: 1 },
-      },
-    });
+    vi.mocked(taskApi.getTask).mockResolvedValue(mockApiResponse({ ...baseTask, status: 'BIDDING', bidCount: 1 }));
     vi.mocked(taskApi.getBids)
-      .mockResolvedValueOnce({
-        data: {
-          success: true,
-          data: [{
-            id: 'bid-1',
-            taskId: 'task-1',
-            finisherId: 'finisher-1',
-            finisherName: 'Finisher One',
-            proposedAmount: 1200,
-            coverNote: 'Can start tomorrow.',
-            estimatedDurationHours: 6,
-            status: 'PENDING',
-            createdAt: '2026-01-01T00:00:00Z',
-          } satisfies Bid],
-        },
-      })
-      .mockResolvedValueOnce({
-        data: {
-          success: true,
-          data: [{
-            id: 'bid-1',
-            taskId: 'task-1',
-            finisherId: 'finisher-1',
-            finisherName: 'Finisher One',
-            proposedAmount: 1200,
-            coverNote: 'Can start tomorrow.',
-            estimatedDurationHours: 6,
-            status: 'ACCEPTED',
-            createdAt: '2026-01-01T00:00:00Z',
-          } satisfies Bid],
-        },
-      });
-    vi.mocked(taskApi.acceptBid).mockResolvedValue({
-      data: {
-        success: true,
-        data: { id: 'bid-1' } as Bid,
-      },
-    });
+      .mockResolvedValueOnce(mockApiResponse([{
+        id: 'bid-1',
+        taskId: 'task-1',
+        finisherId: 'finisher-1',
+        finisherName: 'Finisher One',
+        proposedAmount: 1200,
+        coverNote: 'Can start tomorrow.',
+        estimatedDurationHours: 6,
+        status: 'PENDING',
+        createdAt: '2026-01-01T00:00:00Z',
+      } satisfies Bid]))
+      .mockResolvedValueOnce(mockApiResponse([{
+        id: 'bid-1',
+        taskId: 'task-1',
+        finisherId: 'finisher-1',
+        finisherName: 'Finisher One',
+        proposedAmount: 1200,
+        coverNote: 'Can start tomorrow.',
+        estimatedDurationHours: 6,
+        status: 'ACCEPTED',
+        createdAt: '2026-01-01T00:00:00Z',
+      } satisfies Bid]));
+    vi.mocked(taskApi.acceptBid).mockResolvedValue(mockApiResponse({ id: 'bid-1' } as Bid));
 
     renderTaskDetailPage();
 
