@@ -9,7 +9,12 @@ const OAuth2CallbackPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
   const hasStarted = useRef(false);
-  const [error, setError] = useState('');
+  const token = searchParams.get('token');
+  const oauthError = searchParams.get('error');
+  const initialError = oauthError
+    ? 'Social login failed. Please try again.'
+    : (!token ? 'Missing OAuth token. Please try again.' : '');
+  const [error, setError] = useState(initialError);
 
   useEffect(() => {
     if (hasStarted.current) {
@@ -17,15 +22,7 @@ const OAuth2CallbackPage: React.FC = () => {
     }
     hasStarted.current = true;
 
-    const token = searchParams.get('token');
-    const oauthError = searchParams.get('error');
-
-    if (oauthError) {
-      setError('Social login failed. Please try again.');
-      return;
-    }
-    if (!token) {
-      setError('Missing OAuth token. Please try again.');
+    if (initialError || !token) {
       return;
     }
 
@@ -45,7 +42,7 @@ const OAuth2CallbackPage: React.FC = () => {
         localStorage.removeItem('wp_user');
         setError('Unable to complete login. Please try again.');
       });
-  }, [login, navigate, searchParams]);
+  }, [initialError, login, navigate, token]);
 
   if (error) {
     return (
