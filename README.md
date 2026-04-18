@@ -19,6 +19,49 @@ work-pool/
 
 Each backend module now has its own README under its module directory.
 
+## Architecture diagram
+
+```mermaid
+flowchart LR
+  UI[work-pool-ui<br/>:3000] -->|HTTP| GW[api-gateway<br/>:8080]
+
+  GW -->|HTTP| US[user-service<br/>:8081]
+  GW -->|HTTP| TS[task-service<br/>:8082]
+  GW -->|HTTP| NS[notification-service<br/>:8083]
+  GW -->|HTTP| PS[payment-service<br/>:8084]
+  GW -->|HTTP| RS[rating-service<br/>:8085]
+
+  TS -->|HTTP| US
+
+  US -->|MongoDB| MDB[(MongoDB<br/>:27017)]
+  TS -->|MongoDB| MDB
+  NS -->|MongoDB| MDB
+  PS -->|MongoDB| MDB
+  RS -->|MongoDB| MDB
+
+  US -->|Kafka| K[(Kafka KRaft<br/>:9092 / :29092)]
+  TS -->|Kafka| K
+  NS -->|Kafka| K
+  PS -->|Kafka| K
+  RS -->|Kafka| K
+
+  US -->|Hazelcast| H[(Hazelcast<br/>:5701)]
+  TS -->|Hazelcast| H
+
+  NS -->|SMTP| MH[(Mailhog<br/>:1025 / :8025)]
+  US -->|SMTP| MH
+```
+
+## Service connectivity
+
+- UI (`work-pool-ui`) calls API Gateway over HTTP (`http://localhost:8080`).
+- API Gateway routes synchronous REST requests to backend services.
+- Task Service calls User Service directly for user/task coordination.
+- All backend services use Kafka (KRaft mode) for async event flows.
+- User and Task services connect to Hazelcast for distributed state/caching.
+- User, Task, Notification, Payment, and Rating services store data in MongoDB (separate databases in one Mongo instance).
+- User and Notification services send email through Mailhog SMTP for local/dev flows.
+
 ## Local end-to-end run (Docker Compose)
 
 ```bash
@@ -42,7 +85,7 @@ Endpoints:
 Start infra first (Mongo/Kafka/Hazelcast/Mailhog):
 ```bash
 cd /home/runner/work/work-pool/work-pool
-docker compose up -d mongodb zookeeper kafka hazelcast hazelcast-management mailhog
+docker compose up -d mongodb kafka hazelcast hazelcast-management mailhog
 ```
 
 Run backend:
