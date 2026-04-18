@@ -24,6 +24,7 @@ Each backend module now has its own README under its module directory.
 ```bash
 cd /home/runner/work/work-pool/work-pool
 cp .env.example .env
+docker compose build
 docker compose up -d
 ```
 

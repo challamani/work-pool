@@ -65,6 +65,9 @@ jobs:
       - name: Validate compose config
         run: docker compose config -q
 
+      - name: Build local images
+        run: docker compose build
+
       - name: Boot core infra
         run: docker compose up -d mongodb zookeeper kafka hazelcast mailhog
 
