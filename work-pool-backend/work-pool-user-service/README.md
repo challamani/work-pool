@@ -3,10 +3,20 @@
 ## Purpose
 Authentication, user registration/login, profile management, and login audit tracking.
 
-## Local run
+## Maven commands
 ```bash
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+# Run locally
+cd work-pool-backend
 mvn -pl work-pool-user-service spring-boot:run
+
+# Run tests
+mvn -pl work-pool-user-service test
+
+# Run coverage (JaCoCo report + checks)
+mvn -pl work-pool-user-service verify
+
+# Run checkstyle
+mvn -pl work-pool-user-service checkstyle:check
 ```
 
 ## Default port

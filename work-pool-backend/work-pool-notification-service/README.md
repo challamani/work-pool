@@ -3,10 +3,20 @@
 ## Purpose
 Persists and delivers real-time notifications using Kafka + WebSocket (STOMP/SockJS).
 
-## Local run
+## Maven commands
 ```bash
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+# Run locally
+cd work-pool-backend
 mvn -pl work-pool-notification-service spring-boot:run
+
+# Run tests
+mvn -pl work-pool-notification-service test
+
+# Run coverage (JaCoCo report + checks)
+mvn -pl work-pool-notification-service verify
+
+# Run checkstyle
+mvn -pl work-pool-notification-service checkstyle:check
 ```
 
 ## Default port

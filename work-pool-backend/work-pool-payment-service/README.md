@@ -3,10 +3,20 @@
 ## Purpose
 Escrow and payout orchestration with commission handling and Razorpay integration.
 
-## Local run
+## Maven commands
 ```bash
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+# Run locally
+cd work-pool-backend
 mvn -pl work-pool-payment-service spring-boot:run
+
+# Run tests
+mvn -pl work-pool-payment-service test
+
+# Run coverage (JaCoCo report + checks)
+mvn -pl work-pool-payment-service verify
+
+# Run checkstyle
+mvn -pl work-pool-payment-service checkstyle:check
 ```
 
 ## Default port

@@ -5,10 +5,20 @@ Single entry point for all APIs and WebSocket traffic.
 JWT validation is enforced here via `JwtGlobalFilter` — every request to a protected
 route must carry a valid `Authorization: Bearer <token>` header.
 
-## Local run (HTTP)
+## Maven commands
 ```bash
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+# Run locally (HTTP)
+cd work-pool-backend
 mvn -pl work-pool-api-gateway spring-boot:run
+
+# Run tests
+mvn -pl work-pool-api-gateway test
+
+# Run coverage (JaCoCo report + checks)
+mvn -pl work-pool-api-gateway verify
+
+# Run checkstyle
+mvn -pl work-pool-api-gateway checkstyle:check
 ```
 
 ## Local run with HTTPS (self-signed certificate)

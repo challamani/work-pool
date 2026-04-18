@@ -3,10 +3,20 @@
 ## Purpose
 Task lifecycle, bidding, assignment, completion flow, and publisher-finisher message triggers.
 
-## Local run
+## Maven commands
 ```bash
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+# Run locally
+cd work-pool-backend
 mvn -pl work-pool-task-service spring-boot:run
+
+# Run tests
+mvn -pl work-pool-task-service test
+
+# Run coverage (JaCoCo report + checks)
+mvn -pl work-pool-task-service verify
+
+# Run checkstyle
+mvn -pl work-pool-task-service checkstyle:check
 ```
 
 ## Default port
