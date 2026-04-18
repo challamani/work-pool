@@ -1,0 +1,9 @@
+# Exclude compiled output – each service's multi-stage Dockerfile builds from source
+**/target/
+
+# IDE and OS artifacts
+**/.idea/
+**/.settings/
+**/.classpath
+**/.project
+**/.DS_Store

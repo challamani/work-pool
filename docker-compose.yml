@@ -75,7 +75,9 @@ services:
 
   # ─── Backend Services ────────────────────────────────────────────────
   user-service:
-    build: ./work-pool-backend/work-pool-user-service
+    build:
+      context: ./work-pool-backend
+      dockerfile: work-pool-user-service/Dockerfile
     container_name: wp-user-service
     restart: unless-stopped
     ports:
@@ -94,7 +96,9 @@ services:
       - work-pool-net
 
   task-service:
-    build: ./work-pool-backend/work-pool-task-service
+    build:
+      context: ./work-pool-backend
+      dockerfile: work-pool-task-service/Dockerfile
     container_name: wp-task-service
     restart: unless-stopped
     ports:
@@ -112,7 +116,9 @@ services:
       - work-pool-net
 
   notification-service:
-    build: ./work-pool-backend/work-pool-notification-service
+    build:
+      context: ./work-pool-backend
+      dockerfile: work-pool-notification-service/Dockerfile
     container_name: wp-notification-service
     restart: unless-stopped
     ports:
@@ -129,7 +135,9 @@ services:
       - work-pool-net
 
   payment-service:
-    build: ./work-pool-backend/work-pool-payment-service
+    build:
+      context: ./work-pool-backend
+      dockerfile: work-pool-payment-service/Dockerfile
     container_name: wp-payment-service
     restart: unless-stopped
     ports:
@@ -146,7 +154,9 @@ services:
       - work-pool-net
 
   rating-service:
-    build: ./work-pool-backend/work-pool-rating-service
+    build:
+      context: ./work-pool-backend
+      dockerfile: work-pool-rating-service/Dockerfile
     container_name: wp-rating-service
     restart: unless-stopped
     ports:
@@ -161,7 +171,9 @@ services:
       - work-pool-net
 
   api-gateway:
-    build: ./work-pool-backend/work-pool-api-gateway
+    build:
+      context: ./work-pool-backend
+      dockerfile: work-pool-api-gateway/Dockerfile
     container_name: wp-api-gateway
     restart: unless-stopped
     ports:
