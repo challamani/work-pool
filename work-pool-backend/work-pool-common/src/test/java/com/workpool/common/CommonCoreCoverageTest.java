@@ -55,6 +55,9 @@ class CommonCoreCoverageTest {
         assertEquals("failed", error.getMessage());
         assertFalse(error.equals(ok));
         assertNotEquals(error.hashCode(), ok.hashCode());
+
+        ApiResponse<String> empty = new ApiResponse<>();
+        assertNotNull(empty.getTimestamp());
     }
 
     @Test

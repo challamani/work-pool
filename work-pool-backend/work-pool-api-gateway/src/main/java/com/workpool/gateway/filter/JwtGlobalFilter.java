@@ -27,7 +27,6 @@ public class JwtGlobalFilter implements GlobalFilter, Ordered {
             "/api/v1/auth/register",
             "/api/v1/auth/login",
             "/api/v1/auth/oauth2",
-            "/api/v1/tasks",
             "/api/v1/ratings/users",
             "/api/v1/payments/webhook",
             "/ws/",
@@ -68,6 +67,7 @@ public class JwtGlobalFilter implements GlobalFilter, Ordered {
 
     private boolean isPublicPath(String path) {
         return PUBLIC_PATHS.stream().anyMatch(path::startsWith)
+                || path.equals("/api/v1/tasks")
                 || (path.startsWith("/api/v1/tasks/") && path.matches("/api/v1/tasks/[^/]+$"));
     }
 
