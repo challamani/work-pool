@@ -20,12 +20,12 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID:placeholder}
             client-secret: ${GOOGLE_CLIENT_SECRET:placeholder}
             scope: openid,profile,email
-            redirect-uri: "{baseUrl}/api/v1/auth/oauth2/callback/google"
+            redirect-uri: "${OAUTH2_BASE_URL:{baseUrl}}/api/v1/auth/oauth2/callback/google"
           facebook:
             client-id: ${FACEBOOK_CLIENT_ID:placeholder}
             client-secret: ${FACEBOOK_CLIENT_SECRET:placeholder}
             scope: email,public_profile
-            redirect-uri: "{baseUrl}/api/v1/auth/oauth2/callback/facebook"
+            redirect-uri: "${OAUTH2_BASE_URL:{baseUrl}}/api/v1/auth/oauth2/callback/facebook"
   mail:
     host: ${SPRING_MAIL_HOST:localhost}
     port: ${SPRING_MAIL_PORT:1025}

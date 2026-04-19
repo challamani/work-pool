@@ -13,6 +13,7 @@ data:
   NOTIFICATION_SERVICE_URL: http://work-pool-notification-service:8083
   PAYMENT_SERVICE_URL: http://work-pool-payment-service:8084
   RATING_SERVICE_URL: http://work-pool-rating-service:8085
-  OAUTH2_SUCCESS_REDIRECT_URL: http://localhost:3000/auth/oauth2/callback
-  OAUTH2_FAILURE_REDIRECT_URL: http://localhost:3000/login
+  OAUTH2_SUCCESS_REDIRECT_URL: http://ui.work-pool.org/auth/oauth2/callback
+  OAUTH2_FAILURE_REDIRECT_URL: http://ui.work-pool.org/login
+  OAUTH2_BASE_URL: http://user-service.work-pool.org
 

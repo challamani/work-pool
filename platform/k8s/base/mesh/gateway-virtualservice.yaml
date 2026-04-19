@@ -11,8 +11,9 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - api.work-pool.local
-        - ui.work-pool.local
+        - api.work-pool.org
+        - ui.work-pool.org
+        - user-service.work-pool.org
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -20,7 +21,7 @@ metadata:
   name: work-pool-api-vs
 spec:
   hosts:
-    - api.work-pool.local
+    - api.work-pool.org
   gateways:
     - work-pool-gateway
   http:
@@ -39,7 +40,7 @@ metadata:
   name: work-pool-ui-vs
 spec:
   hosts:
-    - ui.work-pool.local
+    - ui.work-pool.org
   gateways:
     - work-pool-gateway
   http:
@@ -51,4 +52,22 @@ spec:
             host: work-pool-ui
             port:
               number: 80
-
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: work-pool-user-service-vs
+spec:
+  hosts:
+    - user-service.work-pool.org
+  gateways:
+    - work-pool-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: work-pool-user-service
+            port:
+              number: 8081
