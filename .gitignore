@@ -46,3 +46,6 @@ application-local.properties
 .env
 .env.*
 !.env.example
+
+# Platform generated secrets
+platform/secrets/generated/

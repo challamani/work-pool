@@ -1,0 +1,54 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: work-pool-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - api.work-pool.local
+        - ui.work-pool.local
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: work-pool-api-vs
+spec:
+  hosts:
+    - api.work-pool.local
+  gateways:
+    - work-pool-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: work-pool-api-gateway
+            port:
+              number: 8080
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: work-pool-ui-vs
+spec:
+  hosts:
+    - ui.work-pool.local
+  gateways:
+    - work-pool-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: work-pool-ui
+            port:
+              number: 80
+

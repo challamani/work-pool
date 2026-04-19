@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: work-pool-task-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: work-pool-task-service
+  template:
+    metadata:
+      labels:
+        app: work-pool-task-service
+    spec:
+      containers:
+        - name: work-pool-task-service
+          image: work-pool-task-service:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: work-pool-shared-config
+            - secretRef:
+                name: work-pool-shared-secret
+            - secretRef:
+                name: work-pool-task-service-secret
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 90
+            periodSeconds: 20
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: work-pool-task-service
+spec:
+  selector:
+    app: work-pool-task-service
+  ports:
+    - name: http
+      port: 8082
+      targetPort: 8082
+

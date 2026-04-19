@@ -1,0 +1,16 @@
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: work-pool-telemetry
+spec:
+  tracing:
+    - randomSamplingPercentage: 100.0
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: work-pool-peer-auth
+spec:
+  mtls:
+    mode: PERMISSIVE
+
