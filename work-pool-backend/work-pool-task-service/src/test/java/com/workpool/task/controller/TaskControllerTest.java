@@ -30,12 +30,15 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -107,6 +110,35 @@ class TaskControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createTask_withLocalDateTimeScheduledStart_parsesAsUtcInstant() throws Exception {
+        String payload = """
+                {
+                  "title": "Fix my sink now",
+                  "description": "Fix sink in bathroom please urgently",
+                  "category": "HOME_REPAIR",
+                  "city": "Mumbai",
+                  "district": "Mumbai",
+                  "state": "Maharashtra",
+                  "budgetMin": 500,
+                  "budgetMax": 1000,
+                  "scheduledStart": "2026-04-19T09:01"
+                }
+                """;
+
+        when(taskService.createTask(anyString(), any())).thenReturn(buildTaskResponse());
+
+        mockMvc.perform(post("/api/v1/tasks")
+                        .with(authentication(new UsernamePasswordAuthenticationToken(
+                                "pub-1", null, List.of())))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isCreated());
+
+        verify(taskService).createTask(anyString(), argThat(request ->
+                Instant.parse("2026-04-19T09:01:00Z").equals(request.getScheduledStart())));
     }
 
     @Test

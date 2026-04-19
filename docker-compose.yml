@@ -9,7 +9,7 @@ services:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: workpool
-      MONGO_INITDB_ROOT_PASSWORD: workpool_secret
+      MONGO_INITDB_ROOT_PASSWORD: placeholder
       MONGO_INITDB_DATABASE: workpool
     volumes:
       - mongo-data:/data/db
@@ -83,7 +83,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_users?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:placeholder@mongodb:27017/workpool_users?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       HAZELCAST_CLUSTER_MEMBERS: hazelcast:5701
       SPRING_MAIL_HOST: mailhog
@@ -104,7 +104,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_tasks?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:placeholder@mongodb:27017/workpool_tasks?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       HAZELCAST_CLUSTER_MEMBERS: hazelcast:5701
       USER_SERVICE_URL: http://user-service:8081
@@ -124,7 +124,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_notifications?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:placeholder@mongodb:27017/workpool_notifications?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_MAIL_HOST: mailhog
       SPRING_MAIL_PORT: 1025
@@ -143,7 +143,7 @@ services:
     ports:
       - "8084:8084"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_payments?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:placeholder@mongodb:27017/workpool_payments?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_placeholder}
       RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-placeholder_secret}
@@ -162,7 +162,7 @@ services:
     ports:
       - "8085:8085"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://workpool:workpool_secret@mongodb:27017/workpool_ratings?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://workpool:placeholder@mongodb:27017/workpool_ratings?authSource=admin
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
       - mongodb

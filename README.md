@@ -2,6 +2,11 @@
 
 Task marketplace monorepo (Spring Boot microservices + React UI).
 
+## Prerequisites
+
+- Java 21 (backend build/runtime)
+- Node.js 20+ (UI build/runtime)
+
 ## Monorepo
 
 ```text

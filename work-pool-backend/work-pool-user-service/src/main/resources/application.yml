@@ -6,7 +6,7 @@ spring:
     name: work-pool-user-service
   data:
     mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/workpool_users}
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://workpool:placeholder@localhost:27017/workpool_users?authSource=admin}
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
@@ -39,7 +39,7 @@ jwt:
 
 hazelcast:
   cluster-name: ${HAZELCAST_CLUSTER_NAME:work-pool-cluster}
-  cluster-members: ${HAZELCAST_CLUSTER_MEMBERS:127.0.0.1:5701}
+  cluster-members: ${HAZELCAST_CLUSTER_MEMBERS:}
 
 springdoc:
   api-docs:

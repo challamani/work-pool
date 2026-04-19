@@ -10,6 +10,8 @@ npm install
 npm run dev
 ```
 
+App URL: `http://localhost:3000`
+
 ## Build and lint
 ```bash
 npm run lint

@@ -1,7 +1,6 @@
 package com.workpool.user.config;
 
 import com.hazelcast.config.*;
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.spring.context.SpringManagedContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,11 +12,11 @@ public class HazelcastConfig {
     @Value("${hazelcast.cluster-name:work-pool-cluster}")
     private String clusterName;
 
-    @Value("${hazelcast.cluster-members:127.0.0.1:5701}")
+    @Value("${hazelcast.cluster-members:}")
     private String clusterMembers;
 
     @Bean
-    public Config hazelcastConfig() {
+    public Config hazelcastMemberConfig() {
         Config config = new Config();
         config.setClusterName(clusterName);
 
@@ -25,10 +24,18 @@ public class HazelcastConfig {
         network.setPort(5702).setPortAutoIncrement(true);
 
         JoinConfig join = network.getJoin();
-        join.getMulticastConfig().setEnabled(false);
-        TcpIpConfig tcpIp = join.getTcpIpConfig().setEnabled(true);
-        for (String member : clusterMembers.split(",")) {
-            tcpIp.addMember(member.trim());
+        if (clusterMembers != null && !clusterMembers.isBlank()) {
+            join.getMulticastConfig().setEnabled(false);
+            TcpIpConfig tcpIp = join.getTcpIpConfig().setEnabled(true);
+            for (String member : clusterMembers.split(",")) {
+                String trimmed = member.trim();
+                if (!trimmed.isEmpty()) {
+                    tcpIp.addMember(trimmed);
+                }
+            }
+        } else {
+            join.getTcpIpConfig().setEnabled(false);
+            join.getMulticastConfig().setEnabled(true);
         }
 
         // User session cache: TTL 30 min

@@ -9,6 +9,10 @@ route must carry a valid `Authorization: Bearer <token>` header.
 ```bash
 # Run locally (HTTP)
 cd work-pool-backend
+# First-time setup (or after mvn clean): install parent + dependent modules to local repo
+mvn -pl work-pool-api-gateway -am -DskipTests install
+
+# Start gateway
 mvn -pl work-pool-api-gateway spring-boot:run
 
 # Run tests

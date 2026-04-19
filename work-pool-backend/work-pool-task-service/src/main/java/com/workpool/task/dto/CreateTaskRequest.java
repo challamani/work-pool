@@ -1,6 +1,8 @@
 package com.workpool.task.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.workpool.common.enums.TaskCategory;
+import com.workpool.task.jackson.LenientInstantDeserializer;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -46,7 +48,10 @@ public class CreateTaskRequest {
     @DecimalMax("1000000.00")
     private BigDecimal budgetMax;
 
+    @JsonDeserialize(using = LenientInstantDeserializer.class)
     private Instant scheduledStart;
+
+    @JsonDeserialize(using = LenientInstantDeserializer.class)
     private Instant scheduledEnd;
 
     private List<String> tags;
