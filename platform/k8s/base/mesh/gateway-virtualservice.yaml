@@ -14,6 +14,8 @@ spec:
         - api.work-pool.org
         - ui.work-pool.org
         - user-service.work-pool.org
+        - kiali.work-pool.org
+        - prometheus.work-pool.org
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -71,3 +73,41 @@ spec:
             host: work-pool-user-service
             port:
               number: 8081
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: work-pool-kiali-vs
+spec:
+  hosts:
+    - kiali.work-pool.org
+  gateways:
+    - work-pool-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: kiali.istio-system.svc.cluster.local
+            port:
+              number: 20001
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: work-pool-prometheus-vs
+spec:
+  hosts:
+    - prometheus.work-pool.org
+  gateways:
+    - work-pool-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: prometheus.istio-system.svc.cluster.local
+            port:
+              number: 9090

@@ -55,6 +55,8 @@ management:
         include: health,info,metrics
   endpoint:
     health:
+      probes:
+        enabled: true
       show-details: when-authorized
 
 logging:

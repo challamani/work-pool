@@ -20,8 +20,8 @@ build_backend work-pool-rating-service
 build_backend work-pool-api-gateway
 
 docker build -t work-pool-ui:local "$REPO_ROOT/work-pool-ui" \
-  --build-arg VITE_API_BASE_URL=http://api.work-pool.local \
-  --build-arg VITE_WS_URL=ws://api.work-pool.local/ws
+  --build-arg VITE_API_BASE_URL=http://api.work-pool.org \
+  --build-arg VITE_WS_URL=ws://api.work-pool.org/ws
 kind load docker-image work-pool-ui:local --name "$CLUSTER_NAME" --nodes "$KIND_NODE"
 
 echo "All local images built and loaded into kind/$CLUSTER_NAME"

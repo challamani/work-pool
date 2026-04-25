@@ -15,5 +15,5 @@ data:
   RATING_SERVICE_URL: http://work-pool-rating-service:8085
   OAUTH2_SUCCESS_REDIRECT_URL: http://ui.work-pool.org/auth/oauth2/callback
   OAUTH2_FAILURE_REDIRECT_URL: http://ui.work-pool.org/login
-  OAUTH2_BASE_URL: http://user-service.work-pool.org
+  OAUTH2_BASE_URL: http://api.work-pool.org
 
