@@ -57,6 +57,88 @@ flowchart LR
   US -->|SMTP| MH
 ```
 
+## Service connectivity diagram
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   work-pool namespace                                    │
+│                                                                                          │
+│  ┌──────────┐   ┌─────────────┐   ┌──────────────────┐                                  │
+│  │    UI    │──▶│ api-gateway │──▶│  user-service    │──┐                               │
+│  │  :3000   │   │   :8080     │   │     :8081        │  │                               │
+│  └──────────┘   │             │   └──────────────────┘  │  ┌──────────────────────┐    │
+│                 │             │                          ├─▶│  MongoDB  :27017     │    │
+│                 │             │   ┌──────────────────┐  │  └──────────────────────┘    │
+│                 │             │──▶│  task-service    │──┘                               │
+│                 │             │   │     :8082        │                                  │
+│                 │             │   └────────┬─────────┘                                  │
+│                 │             │            │ HTTP (user lookup)                         │
+│                 │             │            ▼                                             │
+│                 │             │   ┌──────────────────┐   ┌──────────────────────┐      │
+│                 │             │──▶│notification-svc  │──▶│  Kafka (KRaft)       │      │
+│                 │             │   │     :8083        │   │  :9092               │      │
+│                 │             │   └──────────────────┘   │                      │      │
+│                 │             │                           │                      │      │
+│                 │             │   ┌──────────────────┐   │                      │      │
+│                 │             │──▶│  payment-service │──▶│                      │      │
+│                 │             │   │     :8084        │   └──────────────────────┘      │
+│                 │             │   └──────────────────┘                                  │
+│                 │             │                           ┌──────────────────────┐      │
+│                 │             │   ┌──────────────────┐   │  Hazelcast  :5701    │      │
+│                 │             │──▶│  rating-service  │   └──────────┬───────────┘      │
+│                 └─────────────┘   │     :8085        │              ▲                  │
+│                                   └──────────────────┘              │                  │
+│                                                                      │                  │
+│  user-service ───────────────────────────────────────────────────▶──┘                  │
+│  task-service ───────────────────────────────────────────────────▶──┘                  │
+│                                                                                          │
+│  user-service / notification-service ──────────────────────────▶  Mailhog  :1025 SMTP  │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+
+  External traffic flow (Kubernetes / Istio):
+
+  ┌─────────┐   ┌──────────────────────────┐   ┌─────────────────┐   ┌──────────────────┐
+  │ Browser │──▶│   Istio Ingress Gateway  │──▶│   api-gateway   │──▶│ backend services │
+  └─────────┘   │  api.work-pool.org       │   │   (k8s svc)     │   └──────────────────┘
+                │  ui.work-pool.org        │──▶├─────────────────┤
+                │  kiali.work-pool.org     │   │  work-pool-ui   │
+                │  prometheus.work-pool.org│   │  (nginx :80)    │
+                └──────────────────────────┘   ├─────────────────┤
+                                               │     Kiali       │
+                                               ├─────────────────┤
+                                               │   Prometheus    │
+                                               └─────────────────┘
+```
+
+## Kiali service mesh dashboard
+
+Kiali provides a real-time traffic graph, health indicators, and Istio config validation for the `work-pool` namespace.
+
+**Screenshot (live traffic graph — April 2026):**
+
+![Kiali Traffic Graph](docs/kiali-traffic-graph.png)
+
+> The graph shows the `istio-ingressgateway` routing traffic through `api-gateway` to all five backend microservices (`user-service`, `task-service`, `notification-service`, `payment-service`, `rating-service`) and their dependencies (`mongodb`, `kafka`, `hazelcast`). 100 % HTTP success rate with mTLS (PERMISSIVE mode) enforced via `PeerAuthentication`.
+
+**Access Kiali locally (kind cluster):**
+
+```bash
+# Port-forward directly
+kubectl port-forward svc/kiali -n istio-system 20001:20001
+
+# Or via the Istio ingress host entry (after bootstrap)
+open http://kiali.work-pool.org
+```
+
+**Key views to check:**
+
+| View | What to look for |
+|---|---|
+| Traffic Graph → `work-pool` | All services connected, green edges, no red/orange errors |
+| Istio Config | No validation warnings on VirtualServices / Gateway |
+| Applications | All apps show healthy workloads |
+| Services | `api-gateway`, `user-service`, `task-service`, etc. all present |
+
 ## Authentication flow
 
 ### Token generation — register / login / OAuth2
