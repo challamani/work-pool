@@ -33,6 +33,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskService {
 
+    /** Tasks in these statuses are still accepting bids and must remain visible in the open-task listing. */
+    static final List<TaskStatus> BIDDABLE_STATUSES = List.of(TaskStatus.OPEN, TaskStatus.BIDDING);
+
     private final TaskRepository taskRepository;
     private final BidRepository bidRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -66,9 +69,9 @@ public class TaskService {
 
     public Page<TaskResponse> getOpenTasks(String state, Pageable pageable) {
         if (state != null) {
-            return taskRepository.findOpenTasksByState(state, pageable).map(this::toTaskResponse);
+            return taskRepository.findBiddableTasksByState(state, pageable).map(this::toTaskResponse);
         }
-        return taskRepository.findByStatusIn(List.of(TaskStatus.OPEN, TaskStatus.BIDDING), pageable).map(this::toTaskResponse);
+        return taskRepository.findByStatusIn(BIDDABLE_STATUSES, pageable).map(this::toTaskResponse);
     }
 
     public Page<TaskResponse> getMyPublishedTasks(String publisherId, Pageable pageable) {
