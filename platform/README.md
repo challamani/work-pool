@@ -52,6 +52,14 @@ Run `cloud-provider-kind` in a separate terminal and keep it running while using
 - ingress traffic path through Istio gateway (`api.work-pool.org`)
 - Prometheus metric availability (`istio_requests_total` in `work-pool`)
 
+## Deploy Gateways
+
+```bash
+kubectl apply -n work-pool -k /Users/mani/workspace/work-pool/platform/k8s/base/mesh
+```
+Application
+- https://ui.work-pool.org/login
+
 ## Dashboards
 
 ```bash
@@ -60,8 +68,8 @@ bash platform/scripts/open-dashboards.sh
 
 This opens local port-forwards for:
 
-- Kiali: `http://127.0.0.1:20001`
-- Prometheus: `http://127.0.0.1:19090`
+- Kiali: `http://kiali.work-pool.org/kiali`
+- Prometheus: `http://prometheus.work-pool.org`
 
 With `cloud-provider-kind` running, `kiali` is patched to `LoadBalancer` and can also be reached via its external address:
 

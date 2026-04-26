@@ -14,13 +14,13 @@
     <description>Work Pool platform – multi-module Maven parent</description>
 
     <modules>
-        <module>work-pool-common</module>
-        <module>work-pool-user-service</module>
-        <module>work-pool-task-service</module>
-        <module>work-pool-notification-service</module>
-        <module>work-pool-payment-service</module>
-        <module>work-pool-rating-service</module>
-        <module>work-pool-api-gateway</module>
+        <module>common</module>
+        <module>user-service</module>
+        <module>task-service</module>
+        <module>notification-service</module>
+        <module>payment-service</module>
+        <module>rating-service</module>
+        <module>api-gateway</module>
     </modules>
 
     <properties>
@@ -63,7 +63,7 @@
             <!-- Work Pool Common -->
             <dependency>
                 <groupId>com.workpool</groupId>
-                <artifactId>work-pool-common</artifactId>
+                <artifactId>common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Lombok -->

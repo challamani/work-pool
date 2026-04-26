@@ -11,15 +11,15 @@ Task marketplace monorepo (Spring Boot microservices + React UI).
 
 ```text
 work-pool/
-├── work-pool-backend/
-│   ├── work-pool-common
-│   ├── work-pool-api-gateway
-│   ├── work-pool-user-service
-│   ├── work-pool-task-service
-│   ├── work-pool-notification-service
-│   ├── work-pool-payment-service
-│   └── work-pool-rating-service
-└── work-pool-ui
+├── backend/
+│   ├── common
+│   ├── api-gateway
+│   ├── user-service
+│   ├── task-service
+│   ├── notification-service
+│   ├── payment-service
+│   └── rating-service
+└── ui
 ```
 
 Each backend module now has its own README under its module directory.
@@ -28,7 +28,7 @@ Each backend module now has its own README under its module directory.
 
 ```mermaid
 flowchart LR
-  UI[work-pool-ui<br/>:3000] -->|HTTP| GW[api-gateway<br/>:8080]
+  UI[ui<br/>:3000] -->|HTTP| GW[api-gateway<br/>:8080]
 
   GW -->|HTTP| US[user-service<br/>:8081]
   GW -->|HTTP| TS[task-service<br/>:8082]
@@ -140,7 +140,7 @@ sequenceDiagram
 
 ## Service connectivity
 
-- UI (`work-pool-ui`) calls API Gateway over HTTP (`http://localhost:8080`).
+- UI (`ui`) calls API Gateway over HTTP (`http://localhost:8080`).
 - API Gateway routes synchronous REST requests to backend services.
 - Task Service calls User Service directly for user/task coordination.
 - All backend services use Kafka (KRaft mode) for async event flows.
@@ -176,14 +176,14 @@ docker compose up -d mongodb kafka hazelcast hazelcast-management mailhog
 
 Run backend:
 ```bash
-cd /home/runner/work/work-pool/work-pool/work-pool-backend
+cd /home/runner/work/work-pool/work-pool/backend
 mvn clean verify
-mvn -pl work-pool-user-service spring-boot:run
-mvn -pl work-pool-task-service spring-boot:run
-mvn -pl work-pool-notification-service spring-boot:run
-mvn -pl work-pool-payment-service spring-boot:run
-mvn -pl work-pool-rating-service spring-boot:run
-mvn -pl work-pool-api-gateway spring-boot:run
+mvn -pl user-service spring-boot:run
+mvn -pl task-service spring-boot:run
+mvn -pl notification-service spring-boot:run
+mvn -pl payment-service spring-boot:run
+mvn -pl rating-service spring-boot:run
+mvn -pl api-gateway spring-boot:run
 ```
 
 Run UI:
@@ -240,7 +240,7 @@ Backend:
   - unit tests
   - Checkstyle
   - SpotBugs
-  - JaCoCo reporting/checks (work-pool-common coverage gate)
+  - JaCoCo reporting/checks (common coverage gate)
 
 Frontend:
 - `npm run lint`

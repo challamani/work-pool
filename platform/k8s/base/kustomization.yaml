@@ -6,5 +6,4 @@ resources:
   - config
   - infra
   - apps
-  - mesh
 

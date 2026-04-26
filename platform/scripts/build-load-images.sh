@@ -12,12 +12,12 @@ build_backend() {
   kind load docker-image "$service:local" --name "$CLUSTER_NAME" --nodes "$KIND_NODE"
 }
 
-build_backend work-pool-user-service
-build_backend work-pool-task-service
-build_backend work-pool-notification-service
-build_backend work-pool-payment-service
-build_backend work-pool-rating-service
-build_backend work-pool-api-gateway
+build_backend user-service
+build_backend task-service
+build_backend notification-service
+build_backend payment-service
+build_backend rating-service
+build_backend api-gateway
 
 docker build -t work-pool-ui:local "$REPO_ROOT/work-pool-ui" \
   --build-arg VITE_API_BASE_URL=http://api.work-pool.org \

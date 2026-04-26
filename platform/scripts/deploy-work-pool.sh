@@ -33,12 +33,12 @@ kubectl apply -f "$SECRETS_DIR"
 # Re-apply base so workloads pick up secret-backed envFrom references after secrets exist.
 kubectl apply -k "$BASE_DIR"
 
-kubectl -n work-pool rollout status deploy/work-pool-user-service --timeout=300s
-kubectl -n work-pool rollout status deploy/work-pool-task-service --timeout=300s
-kubectl -n work-pool rollout status deploy/work-pool-notification-service --timeout=300s
-kubectl -n work-pool rollout status deploy/work-pool-payment-service --timeout=300s
-kubectl -n work-pool rollout status deploy/work-pool-rating-service --timeout=300s
-kubectl -n work-pool rollout status deploy/work-pool-api-gateway --timeout=300s
+kubectl -n work-pool rollout status deploy/user-service --timeout=300s
+kubectl -n work-pool rollout status deploy/task-service --timeout=300s
+kubectl -n work-pool rollout status deploy/notification-service --timeout=300s
+kubectl -n work-pool rollout status deploy/payment-service --timeout=300s
+kubectl -n work-pool rollout status deploy/rating-service --timeout=300s
+kubectl -n work-pool rollout status deploy/api-gateway --timeout=300s
 kubectl -n work-pool rollout status deploy/work-pool-ui --timeout=300s
 
 echo "Work Pool services deployed to namespace work-pool"

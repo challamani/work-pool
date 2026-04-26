@@ -6,7 +6,7 @@ NS=work-pool
 kubectl -n "$NS" get pods
 
 # Ensure backend pods have Istio sidecar and UI does not.
-for app in work-pool-user-service work-pool-task-service work-pool-notification-service work-pool-payment-service work-pool-rating-service work-pool-api-gateway; do
+for app in user-service task-service notification-service payment-service rating-service api-gateway; do
   app_containers=$(kubectl -n "$NS" get pod -l app="$app" -o jsonpath='{.items[0].spec.containers[*].name}')
   init_containers=$(kubectl -n "$NS" get pod -l app="$app" -o jsonpath='{.items[0].spec.initContainers[*].name}')
   all_containers="$app_containers $init_containers"

@@ -32,7 +32,7 @@ spec:
             prefix: /
       route:
         - destination:
-            host: work-pool-api-gateway
+            host: api-gateway
             port:
               number: 8080
 ---
@@ -70,7 +70,7 @@ spec:
             prefix: /
       route:
         - destination:
-            host: work-pool-user-service
+            host: user-service
             port:
               number: 8081
 ---
