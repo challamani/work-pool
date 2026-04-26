@@ -65,9 +65,10 @@ public class TaskService {
     }
 
     public Page<TaskResponse> getOpenTasks(String state, Pageable pageable) {
-        return state != null
-                ? taskRepository.findOpenTasksByState(state, pageable).map(this::toTaskResponse)
-                : taskRepository.findByStatus(TaskStatus.OPEN, pageable).map(this::toTaskResponse);
+        if (state != null) {
+            return taskRepository.findOpenTasksByState(state, pageable).map(this::toTaskResponse);
+        }
+        return taskRepository.findByStatusIn(List.of(TaskStatus.OPEN, TaskStatus.BIDDING), pageable).map(this::toTaskResponse);
     }
 
     public Page<TaskResponse> getMyPublishedTasks(String publisherId, Pageable pageable) {

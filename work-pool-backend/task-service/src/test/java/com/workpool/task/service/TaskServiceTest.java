@@ -107,7 +107,7 @@ class TaskServiceTest {
     void getOpenTasks_noState_returnsAll() {
         Task task = buildOpenTask("task-1", "pub-1");
         Page<Task> page = new PageImpl<>(List.of(task));
-        when(taskRepository.findByStatus(any(), any())).thenReturn(page);
+        when(taskRepository.findByStatusIn(any(), any())).thenReturn(page);
         when(bidRepository.countByTaskIdAndStatus(anyString(), any())).thenReturn(0L);
 
         Page<TaskResponse> result = taskService.getOpenTasks(null, PageRequest.of(0, 10));
