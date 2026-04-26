@@ -154,7 +154,7 @@ const TaskDetailPage: React.FC = () => {
               </div>
             </div>
             {task.location && (
-              <div className="flex items-center gap-3 bg-ocean-50/50 rounded-xl p-3 border border-cyan-100">
+              <div className="flex items-center gap-3 bg-cyan-50/50 rounded-xl p-3 border border-cyan-100">
                 <MapPin className="w-5 h-5 text-ocean-500 flex-shrink-0" />
                 <div>
                   <p className="text-[10px] font-semibold text-ocean-500 uppercase">Location</p>
