@@ -64,6 +64,7 @@
 
 /* ── Global resets ───────────────────────────────────────────── */
 :root {
+  --color-brand: #7c3aed;
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;

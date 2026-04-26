@@ -158,7 +158,7 @@ const TaskDetailPage: React.FC = () => {
                 <MapPin className="w-5 h-5 text-ocean-500 flex-shrink-0" />
                 <div>
                   <p className="text-[10px] font-semibold text-ocean-500 uppercase">Location</p>
-                  <p className="font-bold text-slate-800 text-sm">{task.location.city}, {task.location.state}</p>
+                  <p className="font-bold text-slate-800 text-sm">{task.location.city}, {task.location.district}, {task.location.state}</p>
                 </div>
               </div>
             )}

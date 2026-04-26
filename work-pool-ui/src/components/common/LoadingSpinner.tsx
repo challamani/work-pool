@@ -12,7 +12,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = '', size = 
     <div
       className={`${sizeClass[size]} rounded-full animate-spin`}
       style={{
-        background: 'conic-gradient(from 0deg, transparent 0%, #7c3aed 100%)',
+        background: 'conic-gradient(from 0deg, transparent 0%, var(--color-brand) 100%)',
         WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px))',
         mask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px))',
       }}

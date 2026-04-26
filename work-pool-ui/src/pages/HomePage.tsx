@@ -78,10 +78,10 @@ const HomePage: React.FC = () => {
             <span className="text-gradient">Post Tasks.</span>
             <br className="hidden sm:block" />
             Connect Across{' '}
-            <span className="relative inline-block">
+            <span className="relative inline-block text-brand-600">
               India
               <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 6 Q50 2, 100 5 Q150 8, 198 4" stroke="#7c3aed" strokeWidth="3" strokeLinecap="round" fill="none"/>
+                <path d="M2 6 Q50 2, 100 5 Q150 8, 198 4" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none"/>
               </svg>
             </span>
             .
