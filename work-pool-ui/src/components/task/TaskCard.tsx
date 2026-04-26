@@ -58,7 +58,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   return (
     <Link
       to={`/tasks/${task.id}`}
-      className="card flex flex-col gap-3 p-5 group
+      className="relative card flex flex-col gap-3 p-5 group
                  hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300
                  border border-white/80 overflow-hidden"
     >
