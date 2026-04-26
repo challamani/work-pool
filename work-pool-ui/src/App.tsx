@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -39,9 +39,11 @@ const App: React.FC = () => (
               <Route path="/wallet" element={<WalletPage />} />
             </Route>
             <Route path="*" element={
-              <div className="text-center py-20">
-                <h1 className="text-4xl font-bold text-gray-900">404</h1>
-                <p className="text-gray-500 mt-2">Page not found</p>
+              <div className="text-center py-24 space-y-4">
+                <p className="text-7xl font-extrabold text-gradient">404</p>
+                <p className="text-xl font-bold text-slate-700">Page not found</p>
+                <p className="text-slate-400 text-sm">The page you're looking for doesn't exist.</p>
+                <Link to="/" className="btn-primary inline-flex mt-2 px-6 py-2.5">Go Home</Link>
               </div>
             } />
           </Route>
