@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -95,7 +96,7 @@ class TaskServiceTest {
     void getOpenTasks_withState_returnsPage() {
         Task task = buildOpenTask("task-1", "pub-1");
         Page<Task> page = new PageImpl<>(List.of(task));
-        when(taskRepository.findOpenTasksByState(anyString(), any())).thenReturn(page);
+        when(taskRepository.findBiddableTasksByState(anyString(), any())).thenReturn(page);
         when(bidRepository.countByTaskIdAndStatus(anyString(), any())).thenReturn(0L);
 
         Page<TaskResponse> result = taskService.getOpenTasks("Maharashtra", PageRequest.of(0, 10));
@@ -107,7 +108,7 @@ class TaskServiceTest {
     void getOpenTasks_noState_returnsAll() {
         Task task = buildOpenTask("task-1", "pub-1");
         Page<Task> page = new PageImpl<>(List.of(task));
-        when(taskRepository.findByStatusIn(any(), any())).thenReturn(page);
+        when(taskRepository.findByStatusIn(eq(TaskService.BIDDABLE_STATUSES), any())).thenReturn(page);
         when(bidRepository.countByTaskIdAndStatus(anyString(), any())).thenReturn(0L);
 
         Page<TaskResponse> result = taskService.getOpenTasks(null, PageRequest.of(0, 10));

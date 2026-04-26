@@ -20,17 +20,21 @@ public interface TaskRepository extends MongoRepository<Task, String> {
 
     Page<Task> findByAssignedFinisherId(String finisherId, Pageable pageable);
 
+    /** Returns tasks with status OPEN or BIDDING (biddable) filtered by state. */
     @Query("{ 'status': { $in: ['OPEN', 'BIDDING'] }, 'location.state': ?0 }")
-    Page<Task> findOpenTasksByState(String state, Pageable pageable);
+    Page<Task> findBiddableTasksByState(String state, Pageable pageable);
 
+    /** Returns tasks with status OPEN or BIDDING (biddable) filtered by city. */
     @Query("{ 'status': { $in: ['OPEN', 'BIDDING'] }, 'location.city': ?0 }")
-    Page<Task> findOpenTasksByCity(String city, Pageable pageable);
+    Page<Task> findBiddableTasksByCity(String city, Pageable pageable);
 
+    /** Returns tasks with status OPEN or BIDDING (biddable) matching the given skills and state. */
     @Query("{ 'status': { $in: ['OPEN', 'BIDDING'] }, 'requiredSkills': { $in: ?0 }, 'location.state': ?1 }")
-    Page<Task> findMatchingTasksBySkillsAndState(List<String> skills, String state, Pageable pageable);
+    Page<Task> findBiddableTasksBySkillsAndState(List<String> skills, String state, Pageable pageable);
 
+    /** Returns tasks with status OPEN or BIDDING (biddable) filtered by category and state. */
     @Query("{ 'status': { $in: ['OPEN', 'BIDDING'] }, 'category': ?0, 'location.state': ?1 }")
-    Page<Task> findOpenTasksByCategoryAndState(TaskCategory category, String state, Pageable pageable);
+    Page<Task> findBiddableTasksByCategoryAndState(TaskCategory category, String state, Pageable pageable);
 
     long countByPublisherIdAndStatus(String publisherId, TaskStatus status);
 }
