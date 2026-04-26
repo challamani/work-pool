@@ -5,7 +5,7 @@ import { AxiosError } from 'axios';
 import { taskApi } from '../api/tasks';
 import { useAuthStore } from '../store/authStore';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { MapPin, IndianRupee, Clock, Star, CheckCircle } from 'lucide-react';
+import { MapPin, IndianRupee, Clock, Star, CheckCircle, MessageCircle, Gavel } from 'lucide-react';
 import type { ApiResponse, Bid } from '../types';
 
 const TaskDetailPage: React.FC = () => {
@@ -89,8 +89,12 @@ const TaskDetailPage: React.FC = () => {
     },
   });
 
-  if (isLoading) return <LoadingSpinner className="py-20" />;
-  if (!task) return <div className="text-center py-20 text-gray-500">Task not found</div>;
+  if (isLoading) return <LoadingSpinner className="py-20" size="lg" />;
+  if (!task) return (
+    <div className="text-center py-20 space-y-2">
+      <p className="text-2xl font-bold text-slate-300">Task not found</p>
+    </div>
+  );
 
   const handleBidSubmit = () => {
     const proposedAmount = Number(bidForm.proposedAmount);
@@ -112,74 +116,107 @@ const TaskDetailPage: React.FC = () => {
   const canBid = isAuthenticated && !isPublisher && !hasPlacedBid && (task.status === 'OPEN' || task.status === 'BIDDING');
   const canMessage = isAuthenticated && (isPublisher || isAssignedFinisher) && !!task.assignedFinisherId;
 
+  const statusGradient: Record<string, string> = {
+    OPEN: 'from-emerald-500 to-teal-500',
+    BIDDING: 'from-brand-500 to-indigo-500',
+    ASSIGNED: 'from-violet-500 to-purple-500',
+    IN_PROGRESS: 'from-amber-500 to-orange-400',
+    PENDING_REVIEW: 'from-orange-500 to-flame-500',
+    COMPLETED: 'from-slate-400 to-slate-500',
+    CANCELLED: 'from-red-500 to-rose-500',
+    DISPUTED: 'from-red-700 to-red-600',
+    DRAFT: 'from-slate-400 to-slate-500',
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      {/* Task header */}
-      <div className="card p-6 space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="text-2xl font-bold text-gray-900">{task.title}</h1>
-          <span className={`badge ${task.status === 'OPEN' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-            {task.status}
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+      {/* Task header card */}
+      <div className="card overflow-hidden">
+        {/* Gradient header banner */}
+        <div className={`bg-gradient-to-r ${statusGradient[task.status] ?? 'from-brand-500 to-indigo-500'} px-6 py-4 flex items-center justify-between`}>
+          <span className="text-white/90 text-xs font-bold uppercase tracking-wider">{task.status.replace(/_/g, ' ')}</span>
+          <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full border border-white/30">
+            {task.bidCount} bid{task.bidCount !== 1 ? 's' : ''}
           </span>
         </div>
 
-        <p className="text-gray-700">{task.description}</p>
+        <div className="p-6 space-y-5">
+          <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">{task.title}</h1>
+          <p className="text-slate-600 leading-relaxed">{task.description}</p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-          <div className="flex items-center gap-2 text-gray-600">
-            <IndianRupee className="w-4 h-4 text-green-600" />
-            <span>₹{task.budgetMin.toLocaleString('en-IN')} – ₹{task.budgetMax.toLocaleString('en-IN')}</span>
-          </div>
-          {task.location && (
-            <div className="flex items-center gap-2 text-gray-600">
-              <MapPin className="w-4 h-4 text-blue-600" />
-              <span>{task.location.city}, {task.location.district}, {task.location.state}</span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="flex items-center gap-3 bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+              <IndianRupee className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+              <div>
+                <p className="text-[10px] font-semibold text-emerald-500 uppercase">Budget</p>
+                <p className="font-bold text-slate-800 text-sm">₹{task.budgetMin.toLocaleString('en-IN')} – ₹{task.budgetMax.toLocaleString('en-IN')}</p>
+              </div>
             </div>
-          )}
-          {task.scheduledStart && (
-            <div className="flex items-center gap-2 text-gray-600">
-              <Clock className="w-4 h-4 text-orange-500" />
-              <span>{new Date(task.scheduledStart).toLocaleDateString('en-IN')}</span>
+            {task.location && (
+              <div className="flex items-center gap-3 bg-ocean-50/50 rounded-xl p-3 border border-cyan-100">
+                <MapPin className="w-5 h-5 text-ocean-500 flex-shrink-0" />
+                <div>
+                  <p className="text-[10px] font-semibold text-ocean-500 uppercase">Location</p>
+                  <p className="font-bold text-slate-800 text-sm">{task.location.city}, {task.location.state}</p>
+                </div>
+              </div>
+            )}
+            {task.scheduledStart && (
+              <div className="flex items-center gap-3 bg-amber-50 rounded-xl p-3 border border-amber-100">
+                <Clock className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                <div>
+                  <p className="text-[10px] font-semibold text-amber-500 uppercase">Scheduled</p>
+                  <p className="font-bold text-slate-800 text-sm">{new Date(task.scheduledStart).toLocaleDateString('en-IN')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {task.requiredSkills?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {task.requiredSkills.map((s) => (
+                <span key={s} className="bg-brand-50 text-brand-700 text-xs px-3 py-1 rounded-full border border-brand-200 font-medium">{s}</span>
+              ))}
             </div>
           )}
         </div>
-
-        {task.requiredSkills?.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {task.requiredSkills.map((s) => (
-              <span key={s} className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full">{s}</span>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Bid section */}
       {canBid && (
-        <div className="card p-6 space-y-3">
-          <h2 className="font-semibold text-gray-900">Place a Bid</h2>
+        <div className="card p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Gavel className="w-5 h-5 text-brand-500" />
+            <h2 className="font-bold text-slate-900">Place a Bid</h2>
+          </div>
           {!showBidForm ? (
-            <button onClick={() => setShowBidForm(true)} className="btn-primary">
-              Bid on this Task
+            <button onClick={() => setShowBidForm(true)} className="btn-primary gap-2">
+              <Gavel className="w-4 h-4" /> Bid on this Task
             </button>
           ) : (
-            <form onSubmit={(e) => { e.preventDefault(); handleBidSubmit(); }} className="space-y-3">
-              {error && <div className="text-red-600 text-sm">{error}</div>}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Your Price (₹)</label>
-                <input className="input" type="number" placeholder="e.g. 1500" min={1}
-                  value={bidForm.proposedAmount} onChange={(e) => setBidForm({ ...bidForm, proposedAmount: e.target.value })} required />
+            <form onSubmit={(e) => { e.preventDefault(); handleBidSubmit(); }} className="space-y-4">
+              {error && (
+                <div className="bg-red-50 text-red-700 border border-red-200 text-sm px-4 py-3 rounded-xl">{error}</div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Your Price (₹)</label>
+                  <input className="input" type="number" placeholder="e.g. 1500" min={1}
+                    value={bidForm.proposedAmount} onChange={(e) => setBidForm({ ...bidForm, proposedAmount: e.target.value })} required />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Estimated Duration (hours)</label>
+                  <input className="input" type="number" min={1} max={720}
+                    value={bidForm.estimatedDurationHours} onChange={(e) => setBidForm({ ...bidForm, estimatedDurationHours: Number(e.target.value) })} required />
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cover Note</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Cover Note</label>
                 <textarea className="input" rows={3} placeholder="Describe your approach..."
                   value={bidForm.coverNote} onChange={(e) => setBidForm({ ...bidForm, coverNote: e.target.value })} />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Duration (hours)</label>
-                <input className="input" type="number" min={1} max={720}
-                  value={bidForm.estimatedDurationHours} onChange={(e) => setBidForm({ ...bidForm, estimatedDurationHours: Number(e.target.value) })} required />
-              </div>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button type="submit" disabled={bidMutation.isPending} className="btn-primary">
                   {bidMutation.isPending ? <LoadingSpinner size="sm" className="inline" /> : 'Submit Bid'}
                 </button>
@@ -189,40 +226,34 @@ const TaskDetailPage: React.FC = () => {
           )}
         </div>
       )}
+
       {hasPlacedBid && (
-        <div className="card p-4 text-sm text-emerald-700 bg-emerald-50 border-emerald-200">
+        <div className="card p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
           Your bid has been submitted. You will be notified once the publisher reviews bids.
         </div>
       )}
 
+      {/* Message */}
       {canMessage && (
-        <div className="card p-6 space-y-3">
-          <h2 className="font-semibold text-gray-900">Message participant</h2>
-          <p className="text-xs text-gray-500">
-            Messaging is available only between the task publisher and assigned finisher.
-          </p>
+        <div className="card p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-ocean-500" />
+            <h2 className="font-bold text-slate-900">Message Participant</h2>
+          </div>
+          <p className="text-xs text-slate-400">Messaging is available only between the task publisher and assigned finisher.</p>
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setMessageStatus('');
-              messageMutation.mutate(messageText.trim());
-            }}
+            onSubmit={(e) => { e.preventDefault(); setMessageStatus(''); messageMutation.mutate(messageText.trim()); }}
             className="space-y-3"
           >
-            <textarea
-              className="input"
-              rows={3}
-              placeholder="Write your message"
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              required
-              minLength={2}
-            />
+            <textarea className="input" rows={3} placeholder="Write your message…"
+              value={messageText} onChange={(e) => setMessageText(e.target.value)} required minLength={2} />
             <div className="flex items-center gap-3">
-              <button type="submit" disabled={messageMutation.isPending} className="btn-secondary">
-                {messageMutation.isPending ? <LoadingSpinner size="sm" className="inline" /> : 'Send Message'}
+              <button type="submit" disabled={messageMutation.isPending} className="btn-secondary gap-1.5">
+                <MessageCircle className="w-4 h-4" />
+                {messageMutation.isPending ? <LoadingSpinner size="sm" className="inline" /> : 'Send'}
               </button>
-              {messageStatus && <span className="text-sm text-gray-600">{messageStatus}</span>}
+              {messageStatus && <span className="text-sm text-slate-500">{messageStatus}</span>}
             </div>
           </form>
         </div>
@@ -231,46 +262,50 @@ const TaskDetailPage: React.FC = () => {
       {/* Bids list (publisher only) */}
       {isPublisher && bids.length > 0 && (
         <div className="card p-6 space-y-4">
-          <h2 className="font-semibold text-gray-900">Received Bids ({bids.length})</h2>
-          {bids.map((bid: Bid) => (
-            <div key={bid.id} className="border border-gray-100 rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900">{bid.finisherName}</span>
-                <span className="text-green-600 font-semibold">₹{bid.proposedAmount.toLocaleString('en-IN')}</span>
+          <h2 className="font-bold text-slate-900">Received Bids <span className="text-brand-500">({bids.length})</span></h2>
+          <div className="space-y-3">
+            {bids.map((bid: Bid) => (
+              <div key={bid.id} className="bg-gradient-card rounded-xl p-4 border border-brand-100 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900">{bid.finisherName}</span>
+                  <span className="text-emerald-600 font-extrabold text-lg">₹{bid.proposedAmount.toLocaleString('en-IN')}</span>
+                </div>
+                {bid.coverNote && <p className="text-sm text-slate-600">{bid.coverNote}</p>}
+                <p className="text-xs text-slate-400">⏱ Est. {bid.estimatedDurationHours} hours</p>
+                {task.status !== 'ASSIGNED' && bid.status === 'PENDING' && (
+                  <button
+                    onClick={() => acceptBidMutation.mutate(bid.id)}
+                    disabled={acceptBidMutation.isPending}
+                    className="btn-primary text-sm py-1.5 gap-1"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Accept Bid
+                  </button>
+                )}
+                {bid.status === 'ACCEPTED' && (
+                  <span className="badge bg-emerald-100 text-emerald-700">✓ Accepted</span>
+                )}
               </div>
-              <p className="text-sm text-gray-600">{bid.coverNote}</p>
-              <p className="text-xs text-gray-400">Est. {bid.estimatedDurationHours} hours</p>
-              {task.status !== 'ASSIGNED' && bid.status === 'PENDING' && (
-                <button
-                  onClick={() => acceptBidMutation.mutate(bid.id)}
-                  disabled={acceptBidMutation.isPending}
-                  className="btn-primary text-sm py-1.5"
-                >
-                  <CheckCircle className="w-4 h-4 mr-1 inline" />
-                  Accept Bid
-                </button>
-              )}
-              {bid.status === 'ACCEPTED' && (
-                <span className="badge bg-green-100 text-green-700">✓ Accepted</span>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
       {/* Confirm completion (publisher) */}
       {isPublisher && task.status === 'PENDING_REVIEW' && (
-        <div className="card p-6 space-y-3 border-l-4 border-orange-400">
-          <h2 className="font-semibold text-gray-900">Review & Confirm Completion</h2>
-          <p className="text-sm text-gray-600">The finisher has marked this task as complete. Please review and confirm to release payment.</p>
-          <button onClick={() => confirmMutation.mutate()} disabled={confirmMutation.isPending} className="btn-primary">
-            {confirmMutation.isPending ? <LoadingSpinner size="sm" className="inline" /> : 'Confirm & Release Payment'}
-          </button>
-          {task.assignedFinisherId && (
-            <Link to={`/ratings/new?taskId=${task.id}&userId=${task.assignedFinisherId}`} className="btn-secondary block text-center mt-2">
-              <Star className="w-4 h-4 inline mr-1" />Rate Finisher
-            </Link>
-          )}
+        <div className="card p-6 space-y-4 border-l-4 border-flame-500 bg-amber-50/50">
+          <h2 className="font-bold text-slate-900">Review & Confirm Completion</h2>
+          <p className="text-sm text-slate-600">The finisher has marked this task as complete. Please review and confirm to release payment from escrow.</p>
+          <div className="flex flex-wrap gap-3">
+            <button onClick={() => confirmMutation.mutate()} disabled={confirmMutation.isPending} className="btn-primary">
+              {confirmMutation.isPending ? <LoadingSpinner size="sm" className="inline" /> : '✅ Confirm & Release Payment'}
+            </button>
+            {task.assignedFinisherId && (
+              <Link to={`/ratings/new?taskId=${task.id}&userId=${task.assignedFinisherId}`} className="btn-secondary gap-1.5">
+                <Star className="w-4 h-4" />Rate Finisher
+              </Link>
+            )}
+          </div>
         </div>
       )}
     </div>

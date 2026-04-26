@@ -6,39 +6,46 @@ const RegisterPage: React.FC = () => {
   const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="card p-8 w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <div className="flex justify-center mb-3">
-            <Briefcase className="w-10 h-10 text-blue-600" />
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-sm">
+
+        {/* Brand header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-600 to-indigo-600 shadow-brand-lg mb-4">
+            <Briefcase className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Join Work Pool</h1>
-          <p className="text-sm text-gray-500">Create your account using social login</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 leading-tight">Join Work Pool</h1>
+          <p className="text-slate-500 text-sm mt-1.5">Create your free account with social login</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-3">
-          <a href={`${apiBase}/api/v1/auth/oauth2/authorization/google`}
-            className="btn-secondary text-sm py-2 flex items-center justify-center gap-2">
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
-            Continue with Google
-          </a>
-          <a href={`${apiBase}/api/v1/auth/oauth2/authorization/facebook`}
-            className="btn-secondary text-sm py-2 flex items-center justify-center gap-2">
-            <span className="text-blue-600 font-bold">f</span>
-            Continue with Facebook
-          </a>
+        <div className="card p-7 space-y-5">
+          <div className="space-y-3">
+            <a href={`${apiBase}/api/v1/auth/oauth2/authorization/google`}
+              className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 text-sm
+                         hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 transition-all duration-200 shadow-sm hover:shadow-brand">
+              <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
+              Continue with Google
+            </a>
+            <a href={`${apiBase}/api/v1/auth/oauth2/authorization/facebook`}
+              className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 text-sm
+                         hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 shadow-sm">
+              <span className="w-4 h-4 flex items-center justify-center font-black text-blue-600 text-base leading-none">f</span>
+              Continue with Facebook
+            </a>
+          </div>
+
+          <p className="text-center text-xs text-slate-400 leading-relaxed">
+            We auto-create your Work Pool profile after successful social authentication.
+          </p>
+
+          <p className="text-center text-xs text-slate-300">
+            By registering you agree to our Terms of Service and Privacy Policy.
+          </p>
         </div>
 
-        <p className="text-center text-xs text-gray-500">
-          We auto-create your Work Pool profile after successful social authentication.
-        </p>
-
-        <p className="text-center text-xs text-gray-500">
-          By registering you agree to our Terms of Service and Privacy Policy.
-        </p>
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-slate-500 mt-6">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 font-medium hover:underline">Sign in</Link>
+          <Link to="/login" className="text-brand-600 font-semibold hover:text-brand-700">Sign in</Link>
         </p>
       </div>
     </div>

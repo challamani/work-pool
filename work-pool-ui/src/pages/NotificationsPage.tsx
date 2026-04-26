@@ -6,15 +6,21 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import { Bell, CheckCheck } from 'lucide-react';
 
 const typeColors: Record<string, string> = {
-  TASK_MATCHED: 'bg-blue-500',
-  BID_RECEIVED: 'bg-green-500',
-  BID_ACCEPTED: 'bg-purple-500',
-  BID_REJECTED: 'bg-red-500',
-  PAYMENT_HELD: 'bg-yellow-500',
-  PAYMENT_RELEASED: 'bg-green-600',
-  TASK_COMPLETED: 'bg-blue-600',
-  RATING_RECEIVED: 'bg-yellow-400',
-  SYSTEM_ALERT: 'bg-gray-500',
+  TASK_MATCHED:     'bg-gradient-to-br from-ocean-500 to-cyan-400',
+  BID_RECEIVED:     'bg-gradient-to-br from-emerald-500 to-teal-400',
+  BID_ACCEPTED:     'bg-gradient-to-br from-brand-500 to-indigo-400',
+  BID_REJECTED:     'bg-gradient-to-br from-red-500 to-rose-400',
+  PAYMENT_HELD:     'bg-gradient-to-br from-amber-500 to-yellow-400',
+  PAYMENT_RELEASED: 'bg-gradient-to-br from-emerald-600 to-green-500',
+  TASK_COMPLETED:   'bg-gradient-to-br from-indigo-500 to-blue-400',
+  RATING_RECEIVED:  'bg-gradient-to-br from-amber-400 to-yellow-300',
+  SYSTEM_ALERT:     'bg-gradient-to-br from-slate-400 to-slate-500',
+};
+
+const typeEmoji: Record<string, string> = {
+  TASK_MATCHED: '🎯', BID_RECEIVED: '📬', BID_ACCEPTED: '✅', BID_REJECTED: '❌',
+  PAYMENT_HELD: '🔒', PAYMENT_RELEASED: '💸', TASK_COMPLETED: '🏆',
+  RATING_RECEIVED: '⭐', SYSTEM_ALERT: '🔔',
 };
 
 const NotificationsPage: React.FC = () => {
@@ -42,13 +48,16 @@ const NotificationsPage: React.FC = () => {
   const notifications = data?.data?.data?.content ?? [];
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-4">
+    <div className="max-w-2xl mx-auto px-4 py-8 space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+        <div>
+          <h1 className="section-title">Notifications</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Stay up to date with your tasks</p>
+        </div>
         {notifications.some((n) => !n.read) && (
           <button
             onClick={() => markAllMutation.mutate()}
-            className="btn-secondary text-sm py-1.5 px-3 flex items-center gap-1"
+            className="btn-secondary text-sm py-1.5 px-3 gap-1.5"
           >
             <CheckCheck className="w-4 h-4" /> Mark all read
           </button>
@@ -56,11 +65,14 @@ const NotificationsPage: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <LoadingSpinner className="py-12" />
+        <LoadingSpinner className="py-20" size="lg" />
       ) : notifications.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-          <p>No notifications yet</p>
+        <div className="text-center py-20 space-y-3">
+          <div className="w-16 h-16 mx-auto rounded-full bg-brand-50 flex items-center justify-center">
+            <Bell className="w-8 h-8 text-brand-200" />
+          </div>
+          <p className="font-semibold text-slate-500">No notifications yet</p>
+          <p className="text-sm text-slate-400">We'll notify you when something happens with your tasks.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -68,17 +80,26 @@ const NotificationsPage: React.FC = () => {
             <div
               key={n.id}
               onClick={() => !n.read && markOneMutation.mutate(n.id)}
-              className={`card p-4 flex items-start gap-3 cursor-pointer hover:shadow-md transition-shadow ${!n.read ? 'border-blue-200 bg-blue-50/30' : ''}`}
+              className={`card flex items-start gap-3 p-4 cursor-pointer hover:shadow-card-hover transition-all duration-200
+                ${!n.read ? 'border-brand-200 bg-brand-50/40 ring-1 ring-brand-100' : ''}`}
             >
-              <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${typeColors[n.type] || 'bg-gray-400'}`} />
+              {/* Icon with gradient */}
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-sm
+                ${typeColors[n.type] ?? 'bg-gradient-to-br from-slate-300 to-slate-400'}`}>
+                {typeEmoji[n.type] ?? '🔔'}
+              </div>
+
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 text-sm">{n.title}</p>
-                <p className="text-sm text-gray-600 mt-0.5">{n.message}</p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="font-bold text-slate-900 text-sm">{n.title}</p>
+                <p className="text-sm text-slate-500 mt-0.5 leading-relaxed">{n.message}</p>
+                <p className="text-xs text-slate-300 mt-1.5">
                   {new Date(n.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
                 </p>
               </div>
-              {!n.read && <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-2" />}
+
+              {!n.read && (
+                <span className="w-2.5 h-2.5 rounded-full bg-brand-500 flex-shrink-0 mt-1.5 animate-pulse-brand" />
+              )}
             </div>
           ))}
         </div>

@@ -2,15 +2,15 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { paymentApi } from '../api/other';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { IndianRupee, Wallet, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { IndianRupee, Wallet, ArrowDownLeft, ArrowUpRight, TrendingUp } from 'lucide-react';
 
 const statusColors: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-700',
-  ESCROW_HELD: 'bg-blue-100 text-blue-700',
-  RELEASED: 'bg-green-100 text-green-700',
-  REFUNDED: 'bg-gray-100 text-gray-600',
-  FAILED: 'bg-red-100 text-red-700',
-  DISPUTED: 'bg-orange-100 text-orange-700',
+  PENDING:      'bg-amber-100 text-amber-700',
+  ESCROW_HELD:  'bg-brand-100 text-brand-700',
+  RELEASED:     'bg-emerald-100 text-emerald-700',
+  REFUNDED:     'bg-slate-100 text-slate-600',
+  FAILED:       'bg-red-100 text-red-700',
+  DISPUTED:     'bg-orange-100 text-orange-700',
 };
 
 const WalletPage: React.FC = () => {
@@ -29,25 +29,30 @@ const WalletPage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Wallet</h1>
+      <div>
+        <h1 className="section-title">Wallet</h1>
+        <p className="text-slate-500 text-sm mt-1">Track your balance and transactions</p>
+      </div>
 
       {walletLoading ? (
-        <LoadingSpinner />
+        <LoadingSpinner className="py-10" size="lg" />
       ) : (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="card p-5 space-y-1">
-            <div className="flex items-center gap-2 text-gray-500 text-sm">
-              <Wallet className="w-4 h-4" /> Available Balance
-            </div>
-            <p className="text-2xl font-bold text-gray-900">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Available balance */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 to-indigo-700 p-6 text-white shadow-brand-lg">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/4" />
+            <Wallet className="w-6 h-6 mb-3 opacity-80" />
+            <p className="text-sm font-semibold opacity-80 mb-1">Available Balance</p>
+            <p className="text-3xl font-extrabold">
               ₹{(wallet?.balance ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </p>
           </div>
-          <div className="card p-5 space-y-1">
-            <div className="flex items-center gap-2 text-gray-500 text-sm">
-              <IndianRupee className="w-4 h-4" /> In Escrow
-            </div>
-            <p className="text-2xl font-bold text-blue-600">
+          {/* Escrow */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-ocean-500 to-cyan-600 p-6 text-white shadow-lg">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/4" />
+            <TrendingUp className="w-6 h-6 mb-3 opacity-80" />
+            <p className="text-sm font-semibold opacity-80 mb-1">In Escrow</p>
+            <p className="text-3xl font-extrabold">
               ₹{(wallet?.escrowBalance ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </p>
           </div>
@@ -55,31 +60,38 @@ const WalletPage: React.FC = () => {
       )}
 
       <div className="space-y-3">
-        <h2 className="font-semibold text-gray-900">Transaction History</h2>
+        <h2 className="font-bold text-slate-900">Transaction History</h2>
         {historyLoading ? (
-          <LoadingSpinner />
+          <LoadingSpinner className="py-10" />
         ) : transactions.length === 0 ? (
-          <p className="text-gray-500 text-sm text-center py-8">No transactions yet</p>
+          <div className="text-center py-14 space-y-2">
+            <IndianRupee className="w-10 h-10 mx-auto text-slate-200" />
+            <p className="text-slate-400 text-sm font-medium">No transactions yet</p>
+          </div>
         ) : (
           transactions.map((t) => (
-            <div key={t.id} className="card p-4 flex items-center gap-3">
-              <div className={`p-2 rounded-full ${t.status === 'RELEASED' ? 'bg-green-100' : 'bg-blue-100'}`}>
+            <div key={t.id} className="card p-4 flex items-center gap-3 hover:shadow-card-hover transition-shadow">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                t.status === 'RELEASED' ? 'bg-emerald-100' : 'bg-brand-100'
+              }`}>
                 {t.status === 'RELEASED'
-                  ? <ArrowDownLeft className="w-4 h-4 text-green-600" />
-                  : <ArrowUpRight className="w-4 h-4 text-blue-600" />}
+                  ? <ArrowDownLeft className="w-4 h-4 text-emerald-600" />
+                  : <ArrowUpRight className="w-4 h-4 text-brand-600" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">Task: {t.taskId}</p>
-                <p className="text-xs text-gray-500">
+                <p className="text-sm font-semibold text-slate-900 truncate">Task: {t.taskId}</p>
+                <p className="text-xs text-slate-400">
                   Commission: ₹{t.publisherCommission?.toFixed(2)} + ₹{t.finisherCommission?.toFixed(2)}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-slate-300">
                   {new Date(t.createdAt).toLocaleDateString('en-IN')}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="font-semibold text-gray-900">₹{t.agreedAmount?.toLocaleString('en-IN')}</p>
-                <span className={`badge text-xs ${statusColors[t.status] ?? 'bg-gray-100 text-gray-600'}`}>{t.status}</span>
+              <div className="text-right flex-shrink-0">
+                <p className="font-extrabold text-slate-900">₹{t.agreedAmount?.toLocaleString('en-IN')}</p>
+                <span className={`badge text-[10px] font-bold ${statusColors[t.status] ?? 'bg-slate-100 text-slate-600'}`}>
+                  {t.status}
+                </span>
               </div>
             </div>
           ))
